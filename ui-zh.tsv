@@ -1,0 +1,336 @@
+Little City|小小城镇
+Little City gallery|小小城镇素材预览
+Little City: A hand-drawn city builder in your browser|小小城镇：浏览器里的手绘城市建造游戏
+Little City: a hand-drawn city builder in your browser|小小城镇：浏览器里的手绘城市建造游戏
+Little City: your town, drawn in ink and pencil|小小城镇：用墨水和铅笔绘制你的小镇
+Drawing your town…|正在绘制你的小镇……
+This browser couldn't draw the town. Try reloading, or another browser.|当前浏览器无法绘制小镇，请刷新或更换浏览器。
+Running|自动流转
+Dawn|黎明
+Day|白昼
+Dusk|黄昏
+Night|夜晚
+Spring|春季
+Summer|夏季
+Autumn|秋季
+Winter|冬季
+Festival|节庆
+Auto|自动
+Clear|晴朗
+Cloudy|多云
+Wind|大风
+Mist|薄雾
+Rain|下雨
+Storm|暴风雨
+Snow|下雪
+Time of day|时间
+Season|季节
+Weather|天气
+Time, season and weather|时间、季节与天气
+Time of day: passing|时间：自然流逝
+Season: the year is turning|季节：自然更替
+Weather: comes and goes|天气：自然变化
+Undo|撤销
+Redo|重做
+Finish now|立即完成
+Finishing the town…|正在完成小镇……
+Menu|菜单
+Back|返回
+Close|关闭
+Sound: on|声音：开启
+Sound: off|声音：关闭
+Music|音乐
+Sounds|音效
+Rebuild: on|重建：开启
+Rebuild: off|重建：关闭
+Raiders: on|袭击者：开启
+Raiders: off|袭击者：关闭
+Town stats: on|城镇统计：开启
+Town stats: off|城镇统计：关闭
+Guide to special buildings|特殊建筑指南
+Grow a town|生成小镇
+My towns|我的小镇
+New island|新建岛屿
+Share link|分享链接
+Postcard|明信片
+Save town to a file|导出小镇存档
+Open a town file|导入小镇存档
+On this island|在当前岛屿上
+On a new island|在新岛屿上
+Surprise me|随机生成
+What kind of town?|选择小镇类型
+What kind of island?|选择岛屿类型
+The town you have now stays in My towns.|当前小镇将保留在“我的小镇”中。
+The town you have now will be gone.|当前小镇将被删除。
+This island has no coast for a harbour.|这座岛没有适合建造港口的海岸。
+This island has no room for a forum.|这座岛没有建造广场的空间。
+This island has no room for a castle.|这座岛没有建造城堡的空间。
+This island has no room for a market.|这座岛没有建造市场的空间。
+This island has no river long enough.|这座岛没有足够长的河流。
+This island has no room for farms.|这座岛没有建造农场的空间。
+This island has no high ground.|这座岛没有高地。
+This island has no room for gardens.|这座岛没有建造花园的空间。
+Welcome to Little City|欢迎来到小小城镇
+A town to start you off|为你准备了一座小镇
+Start empty|从空岛开始
+Skip|跳过
+Finishing…|即将完成……
+It’s yours. Tap to build!|小镇属于你了，点击开始建造！
+Here is a town to start you off. Build on it, change it, or begin with an empty island.|这是一座为你准备的小镇。你可以继续建造、改造，或从空岛开始。
+Empty island instead|改为空岛
+Every town you make is kept here, in this browser.|你建造的每座小镇都会保存在当前浏览器中。
+Town name|小镇名称
+Save to a file|导出存档
+Delete|删除
+Here now|当前小镇
+It will be gone for good.|删除后无法恢复。
+That town could not be deleted.|无法删除这座小镇。
+That town is not here any more.|这座小镇已不存在。
+Fetching your towns…|正在读取小镇……
+Keep it|保留
+Drawers|分类
+Pieces and tools|建筑与工具
+Build|建筑
+Ground|地面
+Nature|自然
+Tools|工具
+Mischief|破坏
+Land|地形
+Colour|颜色
+Colour: auto|自动配色
+Colour: auto (matches what you build on)|自动配色（匹配建造位置）
+Auto: match what you build on|自动匹配建造位置的颜色
+Auto colour|自动配色
+Decides for itself what to be|自动选择建筑类型
+House|房屋
+Tower|塔楼
+Light|灯塔
+Lighthouse|灯塔
+Arch|拱门
+Arch or bridge|拱门或桥梁
+Dock|码头
+Dock, on the water|建在水上的码头
+Marble|大理石
+Marble block|大理石方块
+Pillar|柱子
+Stairs|楼梯
+Mill|风车
+Windmill|风车
+Path|小路
+Plaza|广场
+Field|运动场
+Playing field: its shape makes the court, and people come to play|运动场：形状决定场地类型，居民会来这里运动
+Fence|栅栏
+Fence: the middle of a square, or along its edge|栅栏：可放在方格中央或边缘
+Wall|矮墙
+Low wall: the middle of a square, or along its edge|矮墙：可放在方格中央或边缘
+Stall|摊位
+Market stall|市场摊位
+Tree|树木
+Garden|花园
+Fountain|喷泉
+Raise|抬高
+Raise the ground a level (Shift-drag to paint; scroll for a wider brush)|抬高一层地面（Shift 拖动连续调整；滚轮改变笔刷范围）
+Dig|挖低
+Dig the ground down a level; at the bottom it fills with water|挖低一层地面，挖到底时会被水填满
+Level|平整
+Bring the ground to one height: click, or Shift-drag from the height you want|平整地面：点击或从目标高度按 Shift 拖动
+Level brings the ground to the height where you press: drag from there across the ground|平整工具以按下时的高度为准，拖动调整地面
+Change|变换
+Change what a block is, or turn stairs|改变方块类型或旋转楼梯
+Paint|上色
+Recolour a block|改变方块颜色
+Erase|移除
+Remove a piece|移除组件
+Lightning|闪电
+Strike a building with lightning|用闪电击中建筑
+Bomb|炸弹
+Drop a bomb|投放炸弹
+Nuke|核爆
+The big one: a mushroom cloud and a crater|产生蘑菇云和弹坑
+Raid|袭击
+Call raiders: a longship comes in off the nearest coast|召唤袭击者，长船将从最近的海岸驶来
+Mallet|木槌
+Knock a building down a stage|将建筑拆除一个阶段
+Mend|修复
+Mend a building a stage (Shift: all at once)|修复建筑一个阶段（Shift：一次修复全部）
+UFO|飞碟
+Call a flying saucer: it beams up somebody near where you click, and brings them back|召唤飞碟，吸走点击位置附近的人，随后将其送回
+Hand|抓取
+Pick up a person, an animal or a boat and throw it: press on it, drag, let go|抓起居民、动物或船只并抛出：按住、拖动、松开
+Guide: special buildings and how to get them|指南：特殊建筑及其解锁方式
+Close the guide|关闭指南
+Special buildings|特殊建筑
+Field guide|建筑图鉴
+Special buildings and the things your town does, and how to get them|了解特殊建筑、城镇活动与触发条件
+In your town|已在小镇中出现
+in your town|已在小镇中出现
+House style|房屋风格
+Random|随机
+Random: every house different|随机：每栋房屋风格不同
+Link|链接
+Done|完成
+Copy|复制
+Copied|已复制
+Reset|重置
+Length|长度
+Brush|笔刷
+Shorter|缩短
+Longer|加长
+Narrower|缩窄
+Wider|加宽
+Length: scroll over the island, or press − and +|长度：滚动鼠标滚轮，或按 − 与 +
+Fly (F)|飞行（F）
+Esc to land|按 Esc 降落
+W A S D fly · Space up · Shift down · wheel for speed|W A S D 移动，空格上升，Shift 下降，滚轮调速
+Mending a stage at a time; Shift-click mends it at once.|逐阶段修复；按住 Shift 点击可一次修复全部。
+Undo puts it all back.|撤销可恢复原状。
+Only your clicks start anything, and undo puts it all back.|只有主动点击才会触发这些事件，撤销可恢复原状。
+Drag the land to shape it. Drag the sea to turn the view.|拖动陆地调整地形，拖动海面旋转视角。
+This town is too big for a link, so here it is as a file.|小镇太大，无法通过链接分享，已改为导出文件。
+Link copied. Anyone who opens it gets a copy of this town.|链接已复制，打开链接的人将获得这座小镇的副本。
+Copy this link to share your town:|复制此链接分享你的小镇：
+The postcard could not be made.|无法生成明信片。
+Nothing in hand: just look around. Pick a piece to build again.|当前没有选中组件，可以自由查看。选择组件后继续建造。
+whole island|查看全岛
+undo|撤销
+Watch|观看
+Not now|暂不
+That file could not be read.|无法读取该文件。
+Plains|平原
+Hills|丘陵
+Mountain|山地
+River valley|河谷
+Islands|群岛
+Harbour|港口
+Thatch|茅草屋
+Tudor|都铎式
+Farm|农舍
+Villa|别墅
+Blue roof, boarded walls, a glazed door|蓝色屋顶、木板墙、玻璃门
+A straw roof and green shutters|茅草屋顶和绿色百叶窗
+Red tiles over half-timbered walls|红瓦屋顶与半木构墙
+Slate roof, tall windows, bands between the storeys|石板屋顶、高窗与楼层间装饰带
+Green roof, timbered gables, boarded upper storeys|绿色屋顶、木构山墙和木板上层
+Orange tiles and round-topped windows|橙色屋瓦与圆顶窗
+Houses|房屋
+Towers|塔楼
+Stone|石制建筑
+Bridges|桥梁
+Waterfront|水岸
+Green|绿地
+Town|城镇设施
+Playing fields|运动场
+Big days|重大活动
+Through the seasons|四季活动
+By the water|水边活动
+Every day|日常活动
+Evening and night|黄昏与夜间
+After mischief|灾后活动
+Market days, from dawn to early afternoon|集市日，从清晨到午后
+By day, every five to seven minutes|白天，每五至七分钟
+Summer, fair weather, by day|夏季晴朗的白天
+Spring (summer too, with no beach), fair weather, by day|春季晴天（没有海滩时夏季也会发生）
+When snow lies deep, by day|白天积雪较厚时
+Autumn, from late afternoon into dusk|秋季，从傍晚到黄昏
+After 8 minutes of play, then every 12 to 20; or the Raid tool|游戏开始八分钟后，此后每十二至二十分钟；也可用袭击工具触发
+The last third of winter, lit from dusk|冬季最后三分之一时段，黄昏亮灯
+Winter or the festival, at dusk|冬季或节庆期间的黄昏
+Late summer and autumn, by day, when it is dry|夏末至秋季，干燥的白天
+Whenever a ship is in, by day|白天有船停靠时
+When a big ship comes in, by day|白天大船驶入时
+Dawn and by day|清晨与白天
+By day|白天
+Mornings; taken in at dusk or in the rain|早晨晾晒，黄昏或下雨时收回
+By day, a lesson every two and a half minutes|白天，每两分半钟一节课
+By day and at dusk, every three and a half minutes|白天和黄昏，每三分半钟
+By day and into dusk, a game every minute or so|白天至黄昏，约每分钟一场比赛
+All day|全天
+Now and then, when two walkers bump into each other|两位行人偶尔相撞时
+At dusk|黄昏
+At night|夜间
+As soon as something catches fire|一旦有建筑着火
+This browser will not let the town be saved, so it lasts only until you close the page.|当前浏览器不允许保存小镇，关闭页面后将丢失。
+Town opened. It is in My towns now too.|小镇已打开，并已保存到“我的小镇”。
+Your last town could not be opened by this version of Little City. It is kept safe in My towns.|当前版本无法打开上次的小镇，存档仍安全保留在“我的小镇”。
+This is not a Little City town.|这不是小小城镇的存档。
+This town link is damaged or incomplete.|小镇链接损坏或不完整。
+This town was made by a different version of Little City.|该小镇由其他版本创建。
+There is no town in this link.|此链接不含小镇。
+Keep it as mine|保存为我的小镇
+Back to my town|返回我的小镇
+Bringing your towns over…|正在迁移你的小镇……
+try again|重试
+About|关于
+Guide|图鉴
+Play free|免费游玩
+Play|开始游戏
+Play now|立即游玩
+Play Little City|开始小小城镇
+Play Little City free|免费游玩小小城镇
+About Little City|关于小小城镇
+About the game|关于游戏
+The building guide|建筑图鉴
+The guide|图鉴
+The Little City guide|小小城镇图鉴
+The guide: every special building and how to get it|图鉴：所有特殊建筑及获得方式
+How to get it:|获得方式：
+Try it, free in your browser|在浏览器中免费体验
+All 102 buildings and events|全部102种建筑与活动
+You never pick a building from a menu in Little City. You put blocks down and the town decides what they become. Here are all 102 special buildings and events, and how to get each one.|在小小城镇中，无须从菜单选择具体建筑。放置方块后，小镇会自动决定它们变成什么。这里收录全部102种特殊建筑和活动及触发方法。
+In Little City you never choose a building from a menu. Put the blocks down like this and the town does the rest.|在小小城镇中，无须从菜单选择建筑。按上述方式放置方块，剩下的由小镇自动完成。
+A hand-drawn town diorama builder, free in your browser. Place a few blocks, watch them turn into a town, then watch it come to life.|浏览器中的免费手绘微缩城镇建造游戏。放置几个方块，看它们变成小镇，再看小镇逐渐充满生机。
+A house beside a tall tower becomes a chapel. Four blocks stacked by the sea become a lighthouse. Then people move in: the miller carries flour to the bakery, boats go out for fish, and some days there's a market or a wedding on the square. The seasons turn and the lamps come on at dusk.|高塔旁的房屋变成教堂，海边叠放四个方块变成灯塔。随后居民搬入，磨坊工运送面粉，渔船出海，广场不时举办集市或婚礼。四季更替，街灯在黄昏亮起。
+Or grow a whole town on a new island, a harbour town, a castle town or a farming village, and just watch it.|也可以在新岛屿上生成整座港口城镇、城堡城镇或农庄，静静观察。
+Works on computers, iPhone, iPad and Android. Made by Derek Yao.|支持电脑、iPhone、iPad 和 Android。原作者：Derek Yao。
+A tiny, hand-drawn town diorama. Something like a snow globe you build yourself.|一座小巧的手绘微缩城镇，就像亲手制作的雪景水晶球。
+A drone flight over a town grown in the game.|从空中俯瞰游戏生成的小镇。
+Place a few blocks and they turn into a town. What each one becomes depends on where you put it. A house beside a tall tower becomes a chapel. Four blocks stacked by the sea become a lighthouse. A path becomes a street, with lamps and benches along it.|放置方块就能建成小镇。它们变成什么取决于放置位置。高塔旁的房屋变成小教堂，海边四层方块变成灯塔，小路变成有街灯和长椅的街道。
+Then people move in. The miller carries flour down to the bakery, and the baker takes the bread to the stall on the square. Boats go out in the morning and come back with fish. Washing goes up on the lines. Some days there's a market. Sometimes there's a wedding.|居民陆续搬入。磨坊工把面粉送到面包店，面包师把面包送往广场摊位。船只早晨出海，载鱼归来。衣物挂上晾衣绳，有时举办集市，有时举办婚礼。
+The seasons turn. It snows. The lamps come on at dusk.|四季更替，雪花飘落，黄昏时街灯亮起。
+You can also skip the building: grow a whole town on a new island (a harbour town, a castle town, a farming village) and just watch it.|也可以跳过建造，直接在新岛屿上生成整座港口城镇、城堡城镇或农庄，静静欣赏。
+There are over 80 things to find.|有超过80种事物等待探索。
+has all of them.|收录了全部内容。
+A few questions|常见问题
+Who made Little City?|谁制作了小小城镇？
+Derek Yao.|Derek Yao。
+Is it free?|免费吗？
+Yes. It runs in your browser: nothing to download, no account.|是的。直接在浏览器运行，无须下载或注册账号。
+Does it work on a phone?|手机可以玩吗？
+Yes, on iPhone, iPad and Android as well as on a computer.|可以，支持 iPhone、iPad、Android 与电脑。
+Does my town save?|小镇会保存吗？
+Yes, by itself, in your browser. You can also share a town as a link, or save it as a postcard.|会自动保存到浏览器，也可以分享小镇链接或保存明信片。
+is a hand-drawn town diorama builder by Derek Yao. Free, in your browser, on a computer or a phone.|是 Derek Yao 创作的手绘微缩城镇建造游戏，可在电脑和手机浏览器中免费游玩。
+About Little City: a tiny, hand-drawn town diorama by Derek Yao|关于小小城镇：Derek Yao 创作的手绘微缩城镇
+Little City guide: all 102 special buildings and how to get them|小小城镇图鉴：102种特殊建筑及获得方式
+Not found|页面不存在
+This street isn't built yet|这条街还没有建好
+There's nothing at this address. The town is this way.|这个地址没有内容，小镇在这边。
+Go to Little City|前往小小城镇
+Tuning|参数调整
+Copy the changed values as JSON, to paste into the style files|复制修改后的 JSON 参数，以便粘贴至样式文件
+Put every value back|恢复所有参数
+Gallery entries|素材条目
+Generators|生成器
+Layers|图层
+Parts|组件
+Scenarios|场景
+Rules|规则
+Registry|资源清单
+Style|风格
+Harbour town|港口小镇
+Castle town|城堡小镇
+Farming village|农庄
+Market town|集市小镇
+River town|河畔小镇
+Hill town|山间小镇
+Garden town|花园小镇
+Marble town|大理石小镇
+A hand-drawn town diorama builder. Place a few blocks, watch them turn into a town, then watch it come to life.|手绘微缩城镇建造游戏。放置方块，见证小镇从无到有、充满生机。
+A hand-drawn island town with a castle, a harbour, a chapel and a lighthouse.|手绘海岛小镇，拥有城堡、港口、教堂与灯塔。
+Undo (⌘Z)|撤销（⌘Z）
+Redo (⇧⌘Z)|重做（⇧⌘Z）
+House:|房屋：
+Hover for styles|悬停选择风格
+Your towns could not be moved here. They are safe at the old address:|无法将小镇迁移至此，存档仍安全保留在原地址：
+It is kept here; a newer Little City may open it.|存档仍保留在这里，新版本可能可以打开。
