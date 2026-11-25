@@ -186,6 +186,8 @@ def build(source):
     (OUT/"sitemap.xml").unlink(missing_ok=True)
     (OUT/"llms.txt").write_text("# 小小城镇\n\n手绘微缩城镇建造游戏。原作者：Derek Yao。\n\n- [游戏](/)\n- [建筑图鉴](/guide/)\n- [关于](/about/)\n",encoding="utf-8")
     (OUT/"_headers").write_text("/*\n  X-Robots-Tag: noindex, nofollow\n/assets/*\n  Cache-Control: public, max-age=86400\n",encoding="utf-8")
+    from art_style import apply
+    apply(OUT)
     if shutil.which("node"):
         subprocess.run(["node","--check",str(OUT/"zh-cn.js")],check=True)
         subprocess.run(["node","--check",str(app)],check=True)
