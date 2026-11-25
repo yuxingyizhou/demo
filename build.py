@@ -192,12 +192,15 @@ def build(source):
     apply_geometry(OUT)
     from stage4 import apply as apply_stage4
     apply_stage4(OUT)
+    from stage5 import apply as apply_stage5
+    apply_stage5(OUT)
     if shutil.which("node"):
         subprocess.run(["node","--check",str(OUT/"zh-cn.js")],check=True)
         for js in sorted((OUT/"assets").glob("*.js")):
             subprocess.run(["node","--check",str(js)],check=True)
         subprocess.run(["node",str(ROOT/"test_geometry.mjs"),str(OUT)],check=True)
         subprocess.run(["node",str(ROOT/"test_scene.mjs"),str(OUT)],check=True)
+        subprocess.run(["node",str(ROOT/"test_v5.mjs"),str(OUT)],check=True)
     assert len(list((OUT/"guide").glob("*/index.html")))==102
     report={"guide_entries":len(guide),"dictionary_entries":len(ui),"html_pages":len(list(OUT.rglob("*.html"))),"unmatched_static_text":sorted(x for x in missing if x)}
     (ROOT/"localization-report.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
