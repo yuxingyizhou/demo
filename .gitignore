@@ -1,0 +1,4 @@
+dist/
+localization-report.json
+__pycache__/
+*.zip
