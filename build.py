@@ -188,9 +188,13 @@ def build(source):
     (OUT/"_headers").write_text("/*\n  X-Robots-Tag: noindex, nofollow\n/assets/*\n  Cache-Control: public, max-age=86400\n",encoding="utf-8")
     from art_style import apply
     apply(OUT)
+    from geometry import apply as apply_geometry
+    apply_geometry(OUT)
     if shutil.which("node"):
         subprocess.run(["node","--check",str(OUT/"zh-cn.js")],check=True)
-        subprocess.run(["node","--check",str(app)],check=True)
+        for js in sorted((OUT/"assets").glob("*.js")):
+            subprocess.run(["node","--check",str(js)],check=True)
+        subprocess.run(["node",str(ROOT/"test_geometry.mjs"),str(OUT)],check=True)
     assert len(list((OUT/"guide").glob("*/index.html")))==102
     report={"guide_entries":len(guide),"dictionary_entries":len(ui),"html_pages":len(list(OUT.rglob("*.html"))),"unmatched_static_text":sorted(x for x in missing if x)}
     (ROOT/"localization-report.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
