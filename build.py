@@ -185,7 +185,7 @@ def build(source):
     (OUT/"robots.txt").write_text("User-agent: *\nDisallow: /\n",encoding="utf-8")
     (OUT/"sitemap.xml").unlink(missing_ok=True)
     (OUT/"llms.txt").write_text("# 小小城镇\n\n手绘微缩城镇建造游戏。原作者：Derek Yao。\n\n- [游戏](/)\n- [建筑图鉴](/guide/)\n- [关于](/about/)\n",encoding="utf-8")
-    (OUT/"_headers").write_text("/*\n  X-Robots-Tag: noindex, nofollow\n/assets/*\n  Cache-Control: public, max-age=86400\n",encoding="utf-8")
+    (OUT/"_headers").write_text("/*\n  X-Robots-Tag: noindex, nofollow\n/assets/*\n  Cache-Control: no-cache\n",encoding="utf-8")
     from art_style import apply
     apply(OUT)
     from geometry import apply as apply_geometry
@@ -194,13 +194,16 @@ def build(source):
     apply_stage4(OUT)
     from stage5 import apply as apply_stage5
     apply_stage5(OUT)
+    if not shutil.which("node"):
+        raise RuntimeError("Node.js 22 is required for release verification")
     if shutil.which("node"):
         subprocess.run(["node","--check",str(OUT/"zh-cn.js")],check=True)
-        for js in sorted((OUT/"assets").glob("*.js")):
+        for js in sorted([*(OUT/"assets").glob("*.js"),*(OUT/"assets").glob("*.mjs")]):
             subprocess.run(["node","--check",str(js)],check=True)
         subprocess.run(["node",str(ROOT/"test_geometry.mjs"),str(OUT)],check=True)
         subprocess.run(["node",str(ROOT/"test_scene.mjs"),str(OUT)],check=True)
         subprocess.run(["node",str(ROOT/"test_v5.mjs"),str(OUT)],check=True)
+        subprocess.run(["node",str(ROOT/"test_menu.mjs"),str(OUT)],check=True)
     assert len(list((OUT/"guide").glob("*/index.html")))==102
     report={"guide_entries":len(guide),"dictionary_entries":len(ui),"html_pages":len(list(OUT.rglob("*.html"))),"unmatched_static_text":sorted(x for x in missing if x)}
     (ROOT/"localization-report.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
