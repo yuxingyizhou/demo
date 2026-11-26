@@ -47,6 +47,24 @@ Raiders: on|袭击者：开启
 Raiders: off|袭击者：关闭
 Town stats: on|城镇统计：开启
 Town stats: off|城镇统计：关闭
+Loaves delivered|送达的面包
+Fish landed|渔获上岸
+Weddings|婚礼
+Times nuked|核爆次数
+Bombs dropped|投弹次数
+Lightning strikes|雷击次数
+Fires started|起火次数
+Buildings ruined|受损建筑
+Scuffles|小冲突
+Raids survived|成功抵御的袭击
+On fire right now|正在燃烧
+Raiders off the coast! Boats are coming in.|海岸外发现袭击者！船只正在靠近。
+Raiders off the coast!|海岸外发现袭击者！
+raiders are already here|袭击者已经来了
+the town is not ready yet|小镇尚未准备就绪
+there is no town here to raid|这里没有可袭击的小镇
+no ship can reach a shore near the town|船只无法抵达小镇附近的海岸
+waiting for a quiet moment|正在等待合适的时机
 Guide to special buildings|特殊建筑指南
 Grow a town|生成小镇
 My towns|我的小镇
@@ -185,6 +203,43 @@ Esc to land|按 Esc 降落
 W A S D fly · Space up · Shift down · wheel for speed|W A S D 移动，空格上升，Shift 下降，滚轮调速
 Mending a stage at a time; Shift-click mends it at once.|逐阶段修复；按住 Shift 点击可一次修复全部。
 Undo puts it all back.|撤销可恢复原状。
+outside the map|超出地图范围
+some of the ground cannot move: something on it would be in the way|部分地面受上方物体阻挡，无法调整
+the ground cannot move here|此处地面无法调整
+the outer five columns of the map stay sea|地图边缘五格需保留为海面
+this is water already|此处已是水面
+the land can rise no higher|地面已达到最高处
+it would push something past the top of the world|调整后会有物体超出高度上限
+something above is in the way|上方有物体阻挡
+something beside it is in the way|旁边有物体阻挡
+that edit could not be read|无法读取该建造操作
+no ground to shape|此处没有可调整的地面
+unknown colour|无法识别该颜色
+unknown rotation|无法识别该方向
+unknown house style|无法识别该房屋样式
+inside the ground|该位置在地面内部
+something is already there|该位置已被占用
+unknown piece|无法识别该构件
+unknown floor|无法识别该地面类型
+floors cannot go on water|水面上无法铺设地面
+unknown edge piece|无法识别该边界构件
+nothing there|此处没有可操作的构件
+only stairs turn|只有楼梯可以旋转
+unknown damage|无法识别该损坏状态
+it is already like that|该构件已是此状态
+it is not damaged|该构件没有损坏
+unknown edit|无法识别该建造操作
+click something that needs mending|点击需要修复的构件
+click a building or a boat|点击一栋建筑或一艘船
+click a building|点击一栋建筑
+three saucers are about already|已有三个飞碟在附近
+that won't catch|该物体无法点燃
+there is nothing left to knock down|此处已没有可继续拆除的构件
+that is not damaged|这个构件没有损坏
+Click anywhere: a bomb drops, fizzes and goes off. What is right beside it falls to rubble, what is near loses its glass, and every bird takes off. In the sea it only splashes.|点击投弹。落点紧邻的建筑会倒塌，附近建筑的玻璃会破碎，鸟群会飞走。落到海里时只会溅起水花。
+Click a building to knock it a stage worse: cracked, then half-wrecked, then a heap of its own bricks.|点击建筑可逐步拆除。建筑会从开裂变为半毁，最后变成砖堆。
+Click something damaged: scaffolding goes up, and each click mends a stage until it is exactly as you built it. Shift-click mends it at once.|点击受损构件会搭起脚手架，每次点击修复一个阶段。按住 Shift 点击可一次修复。
+the brush|笔刷
 Only your clicks start anything, and undo puts it all back.|只有主动点击才会触发这些事件，撤销可恢复原状。
 Drag the land to shape it. Drag the sea to turn the view.|拖动陆地调整地形，拖动海面旋转视角。
 This town is too big for a link, so here it is as a file.|小镇太大，无法通过链接分享，已改为导出文件。
