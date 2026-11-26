@@ -119,3 +119,8 @@ Pages 分支 art-jiangnan-v4，构建命令与 V3 一致，输出 dist。仅在�
 <!-- cloudflare-rebuild-trigger -->
 
 本次提交用于触发 Cloudflare Pages 对 `art-jiangnan-v5-audit` 分支重新构建。未修改游戏运行时代码；请以 Cloudflare 部署记录中的分支、Commit 和构建日志确认部署结果。
+
+
+<!-- cloudflare-rebuild-trigger-2 -->
+
+触发 Cloudflare Pages 在 GitHub 重新连接后重新构建：`art-jiangnan-v5-audit`。本次仅更新构建触发记录，不修改游戏运行时代码。请在 Cloudflare 部署记录中核对本次 commit 与构建日志。
