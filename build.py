@@ -197,6 +197,8 @@ def build(source):
     apply_stage4(OUT)
     from stage5 import apply as apply_stage5
     apply_stage5(OUT)
+    from modeling import apply as apply_modeling
+    apply_modeling(OUT)
     if not shutil.which("node"):
         raise RuntimeError("Node.js 22 is required for release verification")
     if shutil.which("node"):
