@@ -25,6 +25,10 @@
       else if ((m=s.match(/^Open (.+)$/))) out='打开 '+m[1];
       else if ((m=s.match(/^(A|An) (.+) is growing\.$/i))) out='正在生成'+(find(m[2])||m[2])+'……';
       else if ((m=s.match(/^(\d+) (minute|hour|day)s? ago$/))) out=m[1]+({minute:'分钟',hour:'小时',day:'天'}[m[2]])+'前';
+      else if ((m=s.match(/^(\d+) blocks · (\d+) structures · (\d+) features · (\d+) props · (\d+) actors$/))) out=`${m[1]} 个方块 · ${m[2]} 座建筑 · ${m[3]} 处设施 · ${m[4]} 个道具 · ${m[5]} 个角色`;
+      else if ((m=s.match(/^Style \((\d+) modules\)$/))) out=`风格（${m[1]} 个模块）`;
+      else if ((m=s.match(/^(\d+) icons$/))) out=`${m[1]} 个图标`;
+      else if ((m=s.match(/^This entry could not be built: (.+)$/))) out='无法预览此条目：'+m[1];
       else if ((m=s.match(/^Town (\d+)$/))) out='小镇 '+m[1];
       else if ((m=s.match(/^(.+) \(from the old address\)$/))) out=m[1]+'（从原地址迁移）';
       else if ((m=s.match(/^(.+): (.+)$/)) && find(m[1]) && find(m[2])) out=find(m[1])+'：'+find(m[2]);
