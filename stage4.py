@@ -1,13 +1,18 @@
 from pathlib import Path
-import shutil,sys
+import sys
 
 def apply(root):
     root=Path(root); assets=root/'assets'; app=next(assets.glob('app-*.js')); s=app.read_text(encoding='utf-8')
     def patch(old,new):
         nonlocal s
         assert s.count(old)==1, (old[:100],s.count(old)); s=s.replace(old,new,1)
-    shutil.copyfile(Path(__file__).with_name('scene.mjs'),assets/'jiangnan-scene.mjs')
-    s='import {PRESETS as jiangnanPresets,presetPlan as jiangnanPlan} from "./jiangnan-scene.mjs";\n'+s
+    bundle, = assets.glob('field-basketball.scenario-*.js')
+    scene = Path(__file__).with_name('scene.mjs').read_text(encoding='utf-8')
+    (assets/'jiangnan-scene.mjs').write_text(
+        f'import {{Z as terrain,L as grow,nt as resolve,rt as apply,at as can}} from "./{bundle.name}";\n'
+        'export const nativeSceneAPI = Object.freeze({terrain,grow,resolve,apply,can});\n' + scene,
+        encoding='utf-8')
+    s='import {PRESETS as jiangnanPresets,presetPlan as jiangnanPlan,nativeSceneAPI as jiangnanEngine} from "./jiangnan-scene.mjs";\n'+s
     patch('n.style=e,m.close(),v(),n.item===`house`?i():w.select(`house`)','n.style=e,m.close(),v(),w.select(`house`)')
     patch('return b(),S(),x(),w}var Wa=', '''let modeBar=a(`div`,{class:`jn-mode`,attrs:{role:`group`,"aria-label":`建造模式`}}), detail=a(`div`,{class:`jn-detail`,attrs:{hidden:``}}), status=a(`span`,{class:`jn-status`,attrs:{role:`status`}}), mode=`auto`;
     let buttons=[`自动建造`,`精细建造`,`观察`].map((label,index)=>a(`button`,{text:label,attrs:{type:`button`,"aria-pressed":`false`},on:{click:()=>{w.closePopups();if(index===0){mode=`auto`;w.select(`auto`)}else if(index===1){mode=`detail`;if(n.idle||n.item===`auto`)w.select(`house`)}else{w.setIdle(!0)}sync()}}}));
@@ -18,7 +23,7 @@ def apply(root):
     modeBar.append(...buttons);f.prepend(modeBar,detail);function sync(){let active=n.idle?2:mode===`auto`?0:1;buttons.forEach((b,i)=>b.setAttribute(`aria-pressed`,String(i===active)));detail.toggleAttribute(`hidden`,active!==1);style.value=String(n.style);if(active===1)status.textContent=tools.find(t=>t[0]===n.item)?.[2]??`选择工具后在场景中建造。`};w.onChange(()=>{if(!n.idle)mode=n.item===`auto`?`auto`:`detail`;sync()});b(),S(),x(),sync();return w}var Wa=''')
     patch('},h=()=>{let r=e=>{t(s,e?`sound-on`','},jn=()=>{n.replaceChildren(a(`div`,{class:`lc-confirm lc-choice`,attrs:{"data-ui":`jiangnan-presets`}},[a(`p`,{text:`选择江南场景`}),p(),...jiangnanPresets.map(t=>d(`jiangnan-${t.id}`,`grow`,t.name,r=>e.jiangnanPreset(t.id,r))),f(`jiangnan-back`,h)]))},h=()=>{let r=e=>{t(s,e?`sound-on`')
     patch('u(`grow`,`grow`,`Grow a town`,_,!0),','u(`jiangnan`,`grow`,`江南场景`,jn,!0),u(`grow`,`grow`,`Grow a town`,_,!0),')
-    patch('Ce=Da({growTown(e){','''Ce=Da({jiangnanPreset(id,signal){return Promise.resolve().then(()=>{if(signal.aborted)return;let result=jiangnanPlan(id,{terrain:ke,grow:be,resolve:Be,apply:We,can:Me});if(signal.aborted)return;ye(result.seed);me(O,{...result.plan,jiangnanName:result.name})}).catch(error=>{g.toast(`场景未能生成：`+error.message)})},growTown(e){''')
+    patch('Ce=Da({growTown(e){','''Ce=Da({jiangnanPreset(id,signal){return Promise.resolve().then(()=>{if(signal.aborted)return;let result=jiangnanPlan(id,jiangnanEngine);if(signal.aborted)return;ye(result.seed);me(O,{...result.plan,jiangnanName:result.name})}).catch(error=>{g.toast(`场景未能生成：`+error.message)})},growTown(e){''')
     patch('n.growing?.(`${l} ${s}`,a)','n.growing?.(o.jiangnanName??`${l} ${s}`,a)')
     patch('g.banner(`${l} ${s} is growing.`,','g.banner(o.jiangnanName?`正在生成${o.jiangnanName}……`:`${l} ${s} is growing.`,')
     patch('for(let a=0;;a++){let o=r>=n.islands||i>=n.plans','for(let a=0;a<1200;a++){let o=r>=n.islands||i>=n.plans')
@@ -28,8 +33,8 @@ def apply(root):
     # Curated first visit only: explicit seeds, existing saves and shared links stay unchanged.
     patch('var Mo=null,No=e=>','var jnFirstVisit=!1,Mo=null,No=e=>')
     patch('Lo=Eo(jo===null?Oo():Number(jo)|0);','Lo=Eo((jnFirstVisit=jo===null&&!Xt()&&!ko.has(`gen`)&&!ko.has(`mischief`))?8:jo===null?Oo():Number(jo)|0);')
-    patch('growTown:()=>me([],void 0,fe()),growing:()=>D.active','growTown:()=>{if(jnFirstVisit&&c.world.seed===8){try{let result=jiangnanPlan(`village`,{terrain:ke,grow:be,resolve:Be,apply:We,can:Me});me([],{...result.plan,jiangnanName:result.name},fe());return}catch(error){g.toast(`默认模板未能生成，使用原始布局。`)}}me([],void 0,fe())},growing:()=>D.active')
+    patch('growTown:()=>me([],void 0,fe()),growing:()=>D.active','growTown:()=>{if(jnFirstVisit&&c.world.seed===8){try{let result=jiangnanPlan(`village`,jiangnanEngine);me([],{...result.plan,jiangnanName:result.name},fe());return}catch(error){g.toast(`默认模板未能生成，使用原始布局。`)}}me([],void 0,fe())},growing:()=>D.active')
     app.write_text(s,encoding='utf-8')
-    bundle=next(assets.glob('field-basketball.scenario-*.js')); q=bundle.read_text(encoding='utf-8'); old='if(l&&u&&e.terrain.material[o]===te.sand)return`palm`;'; assert q.count(old)==1; bundle.write_text(q.replace(old,'if(l&&u&&e.terrain.material[o]===te.sand)return`willow`;'),encoding='utf-8')
+    q=bundle.read_text(encoding='utf-8'); old='if(l&&u&&e.terrain.material[o]===te.sand)return`palm`;'; assert q.count(old)==1; bundle.write_text(q.replace(old,'if(l&&u&&e.terrain.material[o]===te.sand)return`willow`;'),encoding='utf-8')
     css=next(assets.glob('app-*.css')); css.write_text(css.read_text(encoding='utf-8')+'''\n.jn-mode,.jn-detail{display:flex;gap:4px;align-items:center;flex-wrap:wrap;padding:5px;background:#f6f2e9;border:1px solid #aab5aa;border-radius:10px;margin-bottom:4px;pointer-events:auto}.jn-detail[hidden]{display:none}.jn-mode button,.jn-detail button,.jn-detail select{font:inherit;color:#34443c;background:#faf8f0;border:1px solid #aab5aa;border-radius:6px;padding:7px 10px;cursor:pointer}.jn-mode button[aria-pressed=true]{background:#42685a;color:#fff}.jn-status{font-size:12px;flex:1 0 100%;color:#48584e}.jn-detail{max-width:min(92vw,690px)}@media(max-width:600px){.jn-detail{max-height:112px;overflow:auto}.jn-mode button,.jn-detail button,.jn-detail select{min-height:36px;padding:5px 8px}}\n''',encoding='utf-8')
 if __name__=='__main__':apply(sys.argv[1] if len(sys.argv)>1 else 'dist')

@@ -23,6 +23,22 @@ export function residentMeshes(builder, tools, person, rig) {
   const wrap = style !== 'skirt';
   const draw = (mesh, label, color, callback) => mesh.with({ink: label, color}, callback);
   const body = builder();
+  const jacket = [[.051, .167], [.06, .219], [.061, rig.shoulderY], [.033, .283], [0, .292]];
+  const lapelPoint = (x, y) => {
+    const next = jacket.findIndex(([, height]) => height >= y);
+    const [r0, y0] = jacket[next - 1];
+    const [r1, y1] = jacket[next];
+    const r = r0 + (r1 - r0) * (y - y0) / (y1 - y0);
+    return [x, y, Math.sqrt(Math.max(0, r * r - x * x)) + .009];
+  };
+  const lapel = points => {
+    for (let i = 1; i < points.length; i++) {
+      const [x0, y0] = points[i - 1];
+      const [x1, y1] = points[i];
+      body.quad(lapelPoint(x0 + .005, y0), lapelPoint(x0 - .005, y0),
+        lapelPoint(x1 - .005, y1), lapelPoint(x1 + .005, y1));
+    }
+  };
 
   body.at(scale(girth, 1, .82), () => {
     draw(body, 'lower-garment', skirt ? bottom : top, () => {
@@ -31,18 +47,20 @@ export function residentMeshes(builder, tools, person, rig) {
       profile(body, [[0, hem], [width, hem], [width - .004, hem + .017],
         [.051, .177]], {segments: 8, crease: .75});
     });
-    draw(body, 'jacket', top, () => profile(body, [[.051, .167], [.06, .219],
-      [.061, rig.shoulderY], [.033, .283], [0, .292]], {segments: 8}));
+    draw(body, 'jacket', top, () => profile(body, jacket, {segments: 8}));
     draw(body, 'waist-sash', sash, () => profile(body, [[.053, .161], [.054, .179]], {segments: 8}));
 
     // The overlapping collar is a raised fabric strip with a visible edge at town scale.
     draw(body, 'layered-collar', lining, () => {
-      body.quad([-.013, .286, .031], [-.027, .282, .027], [.028, .199, .052], [.038, .203, .048]);
-      if (wrap) body.quad([.033, .28, .027], [.019, .284, .032], [-.023, .243, .048], [-.012, .236, .048]);
-      else body.quad([.029, .28, .025], [.015, .283, .031], [.012, .215, .051], [.024, .215, .049]);
+      if (wrap) {
+        lapel([[.022, .281], [.003, .252], [-.013, .236]]);
+        lapel([[-.022, .281], [-.005, .254], [.018, .228], [.037, .204]]);
+      } else {
+        for (const x of [-.024, .024]) lapel([[x, .281], [x, .252], [x, .218]]);
+      }
     });
     if (apron) draw(body, 'work-apron', '#bdad8f', () => {
-      body.quad([-.034, .173, .048], [-.048, .09, .066], [.047, .09, .066], [.034, .173, .048]);
+      body.quad([-.034, .173, .063], [-.048, .09, .077], [.047, .09, .077], [.034, .173, .063]);
     });
     if (skirt) draw(body, 'skirt-pleats', pleatColor(bottom), () => {
       for (const x of [-.05, -.024, .024, .05]) {
@@ -55,7 +73,7 @@ export function residentMeshes(builder, tools, person, rig) {
   const {headY, head} = rig;
   draw(body, 'head', skin, () => ball(body, 0, headY, 0, head * .93, head, head, 8, 5));
   draw(body, 'hair', hair, () => {
-    profile(body, [[head, headY + head * .16], [head * .93, headY + head * .62],
+    profile(body, [[head * 1.10, headY + head * .16], [head * .96, headY + head * .62],
       [head * .58, headY + head * .91], [0, headY + head * 1.05]], {segments: 10});
     if (style === 'skirt' || style === 'child-wrap') {
       ball(body, 0, headY + head * .83, -head * .68, head * .37, head * .42, head * .38, 7, 4);

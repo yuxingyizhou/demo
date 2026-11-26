@@ -9,7 +9,7 @@ def apply(root):
         if s.count(old)!=1: raise ValueError((old[:120],s.count(old)))
         s=s.replace(old,new,1)
     shutil.copyfile(Path(__file__).with_name('districts.mjs'),assets/'jiangnan-districts.mjs')
-    patch('import {PRESETS as jiangnanPresets,presetPlan as jiangnanPlan} from "./jiangnan-scene.mjs";', '''import {PRESETS as jiangnanPresets,presetPlan as jiangnanBase} from "./jiangnan-scene.mjs";
+    patch('import {PRESETS as jiangnanPresets,presetPlan as jiangnanPlan,nativeSceneAPI as jiangnanEngine} from "./jiangnan-scene.mjs";', '''import {PRESETS as jiangnanPresets,presetPlan as jiangnanBase,nativeSceneAPI as jiangnanEngine} from "./jiangnan-scene.mjs";
 import {addDistrict as jiangnanDistrict,pavilionPlan as jiangnanPavilion} from "./jiangnan-districts.mjs";
 const jiangnanPlan=(id,api)=>jiangnanDistrict(jiangnanBase(id,api),id,api);''')
     # Explicitly distinguish native tools from automatic components; macro state belongs to tray.
@@ -21,9 +21,9 @@ const jiangnanPlan=(id,api)=>jiangnanDistrict(jiangnanBase(id,api),id,api);''')
     patch('})),status);\n    modeBar.append', '})),a(`button`,{text:`一键凉亭`,attrs:{type:`button`,"data-jn-stamp":`pavilion`,"aria-pressed":`false`},on:{click:()=>w.selectStamp()}}),status);\n    modeBar.append')
     patch('style.value=String(n.style);if(active===1)status.textContent=', 'style.value=String(n.style);detail.querySelector(`[data-jn-stamp]`).setAttribute(`aria-pressed`,String(n.stamp===`pavilion`&&!n.idle));if(active===1)status.textContent=n.stamp===`pavilion`?`选择 2×2 格空旷平地；点击建造完整凉亭，撤销可恢复。`:')
     # Reuse existing full-edit ghost preview, not a fake overlay.
-    patch('if(!e)return ot(null,``);if(U(m.state.item)){', 'if(!e)return ot(null,``);if(m.state.stamp===`pavilion`){let key=`${F}|pavilion|${e.pick.target}`;return key===$e?void 0:at(()=>Vi(jiangnanPavilion(c.world,c.terrain,e.pick.target,{can:Me,apply:We,resolve:Be}),c),key)}if(U(m.state.item)){')
+    patch('if(!e)return ot(null,``);if(U(m.state.item)){', 'if(!e)return ot(null,``);if(m.state.stamp===`pavilion`){let key=`${F}|pavilion|${e.pick.target}`;return key===$e?void 0:at(()=>Vi(jiangnanPavilion(c.world,c.terrain,e.pick.target,jiangnanEngine),c),key)}if(U(m.state.item)){')
     patch('R=()=>m.state.idle||ga(m.state.item)===null?', 'R=()=>m.state.idle||m.state.stamp||ga(m.state.item)===null?')
-    patch('let r=A(e,t);if(!r)return;let i=R();', 'let r=A(e,t);if(!r)return;if(m.state.stamp===`pavilion`){let p=jiangnanPavilion(c.world,c.terrain,r.pick.target,{can:Me,apply:We,resolve:Be});if(!p.edits.length){j(p.refusal,e,t);return}c.editAll(p.edits);return}let i=R();')
+    patch('let r=A(e,t);if(!r)return;let i=R();', 'let r=A(e,t);if(!r)return;if(m.state.stamp===`pavilion`){let p=jiangnanPavilion(c.world,c.terrain,r.pick.target,jiangnanEngine);if(!p.edits.length){j(p.refusal,e,t);return}c.editAll(p.edits);return}let i=R();')
     patch('runStart(e,t){if(Lt||D.active||Ut||m.state.idle||!dr(m.state.item))', 'runStart(e,t){if(Lt||D.active||Ut||m.state.idle||m.state.stamp||!dr(m.state.item))')
     # If already in detail mode, clicking it cancels the macro instead of leaving it armed.
     patch('if(n.idle||n.item===`auto`)w.select(`house`)', 'if(n.idle||n.item===`auto`||n.stamp)w.select(`house`)')

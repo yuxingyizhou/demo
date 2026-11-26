@@ -19,6 +19,8 @@ def apply(root):
             'outfit=jiangnanOutfit(n(`clothing`),t);return{jiangnan:outfit,skin:Bi(wr.skin,n(`skin`))')
     replace('resident hat state', 'hairStyle:o,hat:c,hatColor:Bi(wr.hats',
             'hairStyle:o,hat:outfit===`reed-hat`?`straw`:`none`,hatColor:Bi(wr.hats')
+    replace('resident hair tones', 'hair:[`#4a3a34`,`#6b4a34`,`#2f2b33`,`#b98a52`,`#d8b46a`,`#9c5a3c`,`#e4dfd6`,`#c96a4a`]',
+            'hair:[`#332e29`,`#4f3a30`,`#2d2929`,`#5f5042`,`#4a413a`,`#685044`,`#a6a19a`,`#43332d`]')
     replace('guard style', 'return{...Vi(e,!1),top:t,bottom:i.metal,',
             'return{...Vi(e,!1),jiangnan:`guard`,top:t,bottom:i.metal,')
     replace('animated resident mesh', 'function Zi(e,t){let n=Wi(e),r=e=>',
