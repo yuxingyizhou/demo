@@ -265,7 +265,6 @@ About|关于
 Guide|图鉴
 › Guide|› 图鉴
 How to get every special building in Little City: the chapel, the lighthouse, the keep, the watermill, market day, a wedding and the rest.|查阅小小城镇特殊建筑的建造条件，以及集市、婚礼等活动的触发方式。
-Your towns could not be moved here. They are safe at the old address:|暂时无法迁移小镇。你的存档仍保存在原地址：
 A beach day on the shore|海滨游玩
 A harvest supper on the square|广场丰收宴
 A snowball fight on the square|广场打雪仗
@@ -276,6 +275,67 @@ Wedding bells at the chapel|教堂的婚礼钟声
 Filter…|筛选……
 Filter entries|筛选条目
 Entries|条目
+Style modules|样式模块
+Behaviour|行为
+Behaviours|行为
+Facts|事实数据
+Systems|系统
+Interface|界面
+tray, tools, menu|工具栏、工具和菜单
+Every icon the interface draws (src/ui/icons.ts).|这里展示界面使用的全部图标。
+resolves to a kind|由位置和邻接关系决定构件类型
+automatic|自动生成
+placeholder|占位
+placeholder box|占位方块
+real|已实现
+passing|自然流逝
+view front|看正面
+view side|看侧面
+view back|看背面
+view island|看全岛
+view close|看近景
+view overview|看全景
+hello-town|示例小镇
+Two houses, a tower and a path on flat ground.|平地上有两座房屋、一座塔楼和一条小路。
+automatic specimen (gallery/specimens.ts)|自动生成的预览样本（gallery/specimens.ts）
+feature|建筑细节
+prop|道具
+actor|角色
+supports|地基与支撑
+terrain|地形
+resident|居民
+rower|划船人
+figure|人物
+door leaf|门扇
+window light|窗灯
+bird wing|鸟翼
+small bird|小鸟
+birdhouse|鸟屋
+gull|海鸥
+pigeon|鸽子
+swift|雨燕
+balloon|气球
+dormer|屋顶窗
+portico|柱廊
+trellis|花架
+railing|栏杆
+weathervane|风向标
+finial|屋脊饰件
+mooring line|系缆绳
+water wheel|水轮
+hanging lantern|吊灯笼
+roof life|屋顶生态
+house styles|房屋样式
+people sheet|人物列阵
+people town|小镇居民
+terrain steps|地形台阶
+ground docks|码头组件
+ground floors|地面铺装
+ground trees|树木组件
+soft ink|浅墨轮廓
+tray pieces|建造工具一览
+monuments vertical|竖向建筑一览
+village green and harbour|村庄绿地与港口
 Play free|免费游玩
 Play|开始游戏
 Play now|立即游玩

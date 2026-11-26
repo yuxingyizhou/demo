@@ -16,6 +16,16 @@ ROOT = Path(__file__).resolve().parent
 REV = "af6eac24ff21cbf027d4d33fd8219237a559f5b5"
 URL = f"https://codeload.github.com/yaoderek/littlecity.io/zip/{REV}"
 OUT = ROOT / "dist"
+UI_ATTRS = ("title", "alt", "aria-label", "aria-description", "aria-valuetext", "placeholder")
+TEXT_META = {
+    "description", "og:description", "twitter:description", "og:title", "twitter:title",
+    "og:site_name", "application-name", "apple-mobile-web-app-title", "og:image:alt",
+    "twitter:image:alt",
+}
+
+
+def needs_translation(text):
+    return bool(re.search(r"[A-Za-z]{3}", text) and not re.search(r"[\u3400-\u9fff]", text))
 
 def rows(name, count):
     out = [line.split("|", count-1) for line in (ROOT / name).read_text(encoding="utf-8").splitlines() if line.strip()]
@@ -70,6 +80,7 @@ def build(source):
         en=heading.removesuffix(" in Little City")
         condition=soup.select_one("p.how").get_text(" ",strip=True).removeprefix("How to get it:").strip()
         ui[en]=name
+        ui[f"gallery:{slug}"]=name
         ui[en+" in Little City"]=name+"（小小城镇）"
         ui[heading]=name+"：获得方式"
         ui[en+" in Little City, drawn in ink and pencil"]=name+"（手绘）"
@@ -93,6 +104,8 @@ def build(source):
             return s.replace(t,ui[t],1)
         return s
     missing=set()
+    missing_attributes=set()
+    missing_metadata=set()
     origin=os.environ.get("SITE_URL") or os.environ.get("CF_PAGES_URL") or ""
     origin=origin.rstrip("/")
     for p in sorted(OUT.rglob("*.html")):
@@ -115,12 +128,14 @@ def build(source):
             new=trans(old)
             if new!=old:
                 n.replace_with(new)
-            elif re.search(r"[A-Za-z]{3}",old) and not re.search(r"[\u3400-\u9fff]",old) and n.parent.name not in ("title",):
+            elif needs_translation(old):
                 missing.add(old.strip())
         for tag in soup.find_all(True):
-            for attr in ("title","alt","aria-label","aria-description","placeholder"):
+            for attr in UI_ATTRS:
                 if isinstance(tag.get(attr),str):
                     tag[attr]=trans(tag[attr])
+                    if needs_translation(tag[attr]):
+                        missing_attributes.add((p.relative_to(OUT).as_posix(), attr, tag[attr]))
         for m in soup.find_all("meta"):
             key=m.get("name") or m.get("property") or ""
             if not m.has_attr("content"):
@@ -129,14 +144,16 @@ def build(source):
                 m["content"]=pages[p][1] if p in pages else trans(m["content"])
             elif key in ("og:title","twitter:title"):
                 m["content"]=soup.title.get_text() if soup.title else trans(m["content"])
-            elif key == "og:image:alt" and p in pages:
+            elif key in ("og:image:alt","twitter:image:alt") and p in pages:
                 m["content"]=pages[p][0]+"（小小城镇）"
-            elif key in ("og:site_name","application-name","apple-mobile-web-app-title","og:image:alt"):
+            elif key in TEXT_META:
                 m["content"]=trans(m["content"])
             elif key == "og:locale":
                 m["content"]="zh_CN"
             elif key in ("og:url","og:image","og:video","og:video:secure_url","twitter:image"):
                 m["content"]=m["content"].replace("https://littlecity.io",origin)
+            if key in TEXT_META and needs_translation(m["content"]):
+                missing_metadata.add((p.relative_to(OUT).as_posix(), key, m["content"]))
         for link in soup.find_all("link",rel="canonical"):
             if origin:
                 link["href"]=link["href"].replace("https://littlecity.io",origin)
@@ -183,6 +200,8 @@ def build(source):
         m["name"]=m["short_name"]="小小城镇"
         m["lang"]="zh-CN"
         m["description"]=trans(m["description"])
+        if needs_translation(m["description"]):
+            missing_metadata.add((manifest.name, "description", m["description"]))
         manifest.write_text(json.dumps(m,ensure_ascii=False,indent=2),encoding="utf-8")
     (OUT/"zh-cn.js").write_text("window.LC_ZH="+json.dumps(ui,ensure_ascii=False,separators=(",",":"))+";\n"+(ROOT/"zh-runtime.js").read_text(encoding="utf-8"),encoding="utf-8")
     (OUT/"robots.txt").write_text("User-agent: *\nDisallow: /\n",encoding="utf-8")
@@ -210,7 +229,9 @@ def build(source):
         subprocess.run(["node",str(ROOT/"test_v5.mjs"),str(OUT)],check=True)
         subprocess.run(["node",str(ROOT/"test_menu.mjs"),str(OUT)],check=True)
     assert len(list((OUT/"guide").glob("*/index.html")))==102
-    report={"guide_entries":len(guide),"dictionary_entries":len(ui),"html_pages":len(list(OUT.rglob("*.html"))),"unmatched_static_text":sorted(x for x in missing if x)}
+    report={"guide_entries":len(guide),"dictionary_entries":len(ui),"html_pages":len(list(OUT.rglob("*.html"))),
+            "unmatched_static_text":sorted(missing),"unmatched_static_attributes":sorted(missing_attributes),
+            "unmatched_metadata":sorted(missing_metadata)}
     (ROOT/"localization-report.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
     print(json.dumps(report,indent=2))
     print("Static site ready:",OUT)
