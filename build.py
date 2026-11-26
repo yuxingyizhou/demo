@@ -27,6 +27,26 @@ TEXT_META = {
 def needs_translation(text):
     return bool(re.search(r"[A-Za-z]{3}", text) and not re.search(r"[\u3400-\u9fff]", text))
 
+
+def check_event_translations(assets, translations):
+    pointer, = assets.glob("pointer-*.js")
+    source = pointer.read_text(encoding="utf-8")
+    table = re.search(r"\{loaves:`[^`]+`,fish:`[^`]+`,[^{}]+\}", source)
+    if table is None:
+        raise ValueError("Cannot locate the town statistics label table")
+    counters = set(re.findall(r":`([^`]+)`", table.group()))
+    titles = {
+        title for expression in re.findall(r"\.begin\(\{kind:`[^`]+`,title:([^,]+),big:", source)
+        for title in re.findall(r"`([A-Z][^`]+ [^`]*)`", expression)
+    }
+    if not titles:
+        raise ValueError("Cannot locate event announcement titles")
+    missing = sorted(label for label in counters | titles
+                     if label not in translations or needs_translation(translations[label]))
+    if missing:
+        raise ValueError(f"Missing event or statistics translations: {missing}")
+    return {"stat_labels": len(counters), "event_titles": len(titles)}
+
 def rows(name, count):
     out = [line.split("|", count-1) for line in (ROOT / name).read_text(encoding="utf-8").splitlines() if line.strip()]
     assert all(len(row) == count for row in out), name
@@ -203,6 +223,7 @@ def build(source):
         if needs_translation(m["description"]):
             missing_metadata.add((manifest.name, "description", m["description"]))
         manifest.write_text(json.dumps(m,ensure_ascii=False,indent=2),encoding="utf-8")
+    event_coverage=check_event_translations(OUT/"assets",ui)
     (OUT/"zh-cn.js").write_text("window.LC_ZH="+json.dumps(ui,ensure_ascii=False,separators=(",",":"))+";\n"+(ROOT/"zh-runtime.js").read_text(encoding="utf-8"),encoding="utf-8")
     (OUT/"robots.txt").write_text("User-agent: *\nDisallow: /\n",encoding="utf-8")
     (OUT/"sitemap.xml").unlink(missing_ok=True)
@@ -213,6 +234,7 @@ def build(source):
         subprocess.run(["node","--check",str(app)],check=True)
     assert len(list((OUT/"guide").glob("*/index.html")))==102
     report={"guide_entries":len(guide),"dictionary_entries":len(ui),"html_pages":len(list(OUT.rglob("*.html"))),
+            "dynamic_ui":event_coverage,
             "unmatched_static_text":sorted(missing),"unmatched_static_attributes":sorted(missing_attributes),
             "unmatched_metadata":sorted(missing_metadata)}
     (ROOT/"localization-report.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
