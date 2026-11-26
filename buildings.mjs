@@ -83,9 +83,21 @@ export function entryFrame(mesh, roofColor, style, tilePattern) {
 
 export function pavilionHeight(base, pitch, distance, point, outline) {
   const curve = .025 * Math.exp(-Math.max(0, distance) * 6);
-  if (!point || outline.length !== 4) return base + distance * pitch + curve;
+  if (!point || !outline.length) return base + distance * pitch + curve;
   const nearest = Math.min(...outline.map(([x, z]) => Math.hypot(point[0] - x, point[1] - z)));
-  return base + distance * pitch + curve + .106 * Math.max(0, 1 - nearest / .5) ** 2;
+  return base + distance * pitch + curve + .13 * Math.max(0, 1 - nearest / .48) ** 2;
+}
+
+export function stoveVent(mesh, tilePattern) {
+  mesh.with({color: '#746657', ink: 'stove-vent'}, () => {
+    mesh.box([-.07, -.29, -.067], [.07, .065, .067]);
+    for (const x of [-.052, .052]) {
+      mesh.box([x - .013, .065, -.046], [x + .013, .103, .046]);
+    }
+  });
+  mesh.with({color: '#45494a', pattern: tilePattern, ink: 'vent-tile'}, () => {
+    mesh.box([-.088, .103, -.078], [.088, .133, .078]);
+  });
 }
 
 export function towerEaves(mesh, radius, rise, roofColor, pattern) {

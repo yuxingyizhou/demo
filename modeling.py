@@ -52,16 +52,27 @@ def apply(root):
             'if(a===`shop`||a===`double`&&s&&[`town-hall`,`manor`,`inn`,`schoolhouse`].includes(role))'
             'jiangnanEntry(n,r.roofColor,a,z.shingles);'
             'if(n.setColor(r.trim).setInk(`frame`),a===`double`)')
+    replace('stove vent', 'a=e.variant??`plain`,o=.32;if(a===`pipe`)',
+            'a=e.variant??`plain`,o=.32;'
+            'if(a===`plain`){jiangnanStoveVent(n,z.shingles);return {mesh:n.build(),anchors:{"chimney-top":F(0,.14,0)}}}'
+            'if(a===`pipe`)')
 
     replace('pavilion field', 'let s=.045,c=e=>r+e*t.pitch+.06*Math.exp(-Math.max(0,e)*5),l=i??1/0;',
-            'let s=.045,outline=sm(t.outline,n),c=(h,p)=>jiangnanPavilionHeight(r,t.pitch,h,p,outline),l=i??1/0;')
+            'let s=.045,outline=sm(t.outline,n),corners=t.round||t.hubs.length===1?outline:[],'
+            'c=(h,p)=>jiangnanPavilionHeight(r,t.pitch,h,p,corners),l=i??1/0;')
     replace('pavilion roof points', 'i<=l+1e-9&&t.push([n[0],c(i),n[1]]),',
             'i<=l+1e-9&&t.push([n[0],c(i,n),n[1]]),')
+    replace('octagonal roof segments', 'for(let e=0;e<n.length;e++)i.push({p:[r,n[e],n[(e+1)%n.length]],h:[1+t,0,0]});return i',
+            'for(let e=0;e<n.length;e++){let a=n[e],b=n[(e+1)%n.length],m=[(a[0]+b[0])/2,(a[1]+b[1])/2];'
+            'i.push({p:[r,a,m],h:[1+t,0,0]},{p:[r,m,b],h:[1+t,0,0]})}return i')
     replace('pavilion roof clipping', 't.push([n[0]+(a[0]-n[0])*e,c(l),n[1]+(a[1]-n[1])*e])',
             'let p=[n[0]+(a[0]-n[0])*e,n[1]+(a[1]-n[1])*e];t.push([p[0],c(l,p),p[1]])')
     replace('pavilion fascia', 'let i=sm(t.outline,n);for(let t=0;t<i.length;t++){let n=i[t],a=i[(t+1)%i.length];e.quad([a[0],r-s,a[1]],[n[0],r-s,n[1]],[n[0],c(0),n[1]],[a[0],c(0),a[1]])}',
             'for(let t=0;t<outline.length;t++){let n=outline[t],a=outline[(t+1)%outline.length];'
-            'e.quad([a[0],r-s,a[1]],[n[0],r-s,n[1]],[n[0],c(0,n),n[1]],[a[0],c(0,a),a[1]])}')
+            'let m=[(n[0]+a[0])/2,(n[1]+a[1])/2];'
+            'for(let [first,last] of [[n,m],[m,a]])'
+            'e.quad([last[0],r-s,last[1]],[first[0],r-s,first[1]],'
+            '[first[0],c(0,first),first[1]],[last[0],c(0,last),last[1]])}')
     replace('pavilion ridge points', '_=c(s),v=c(o),y=u*t.pitch*.9+.004',
             '_=c(s,n),v=c(o,i),y=u*t.pitch*.9+.004')
     replace('tower cap',
@@ -72,7 +83,8 @@ def apply(root):
         shutil.copyfile(Path(__file__).with_name(f'{module}.mjs'), assets / f'jiangnan-{module}.mjs')
     bundle.write_text('import {roofLift as jiangnanRoofLift,roofNormal as jiangnanRoofNormal,'
                       'tileEnds as jiangnanTileEnds,lattice as jiangnanLattice,entryFrame as jiangnanEntry,'
-                      'pavilionHeight as jiangnanPavilionHeight,towerEaves as jiangnanTowerEaves} '
+                      'pavilionHeight as jiangnanPavilionHeight,towerEaves as jiangnanTowerEaves,'
+                      'stoveVent as jiangnanStoveVent} '
                       'from "./jiangnan-buildings.mjs";\n'
                       'import {outfit as jiangnanOutfit,residentMeshes as jiangnanResident,'
                       'reedHat as jiangnanReedHat} from "./jiangnan-people.mjs";\n' + source, encoding='utf-8')

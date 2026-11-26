@@ -7,7 +7,7 @@ const bundle=fs.readdirSync(assets).find(x=>x.startsWith('field-basketball.scena
 const saveFile=fs.readdirSync(assets).find(x=>x.startsWith('save-')&&x.endsWith('.js'));
 const tmp=path.join(assets,'.jiangnan-test.mjs');
 try{
-fs.writeFileSync(tmp,fs.readFileSync(path.join(assets,bundle),'utf8')+'\nexport {B as MeshBuilder,tp as roofField,np as emitRoof,ns as rowboat,Yv as lantern,jiangnanMoonGate as moonGate,Qb as windowPart,Vi as resident,Hi as guard,Zi as residentParts,aa as rig,ra as pose,$i as assemble,lg as towerCap};\n');
+fs.writeFileSync(tmp,fs.readFileSync(path.join(assets,bundle),'utf8')+'\nexport {B as MeshBuilder,tp as roofField,np as emitRoof,ns as rowboat,Yv as lantern,jiangnanMoonGate as moonGate,Qb as windowPart,Vi as resident,Hi as guard,Zi as residentParts,aa as rig,ra as pose,$i as assemble,lg as towerCap,hb as chimney,jiangnanPavilionHeight as pavilionHeight};\n');
 const m=await import(pathToFileURL(tmp));const save=await import(pathToFileURL(path.join(assets,saveFile)));
 const valid=(label,mesh)=>{assert(mesh.position.length>0,label);assert(mesh.position.length%9===0,label+' triangle count');assert(mesh.position.every(Number.isFinite),label+' position');assert(mesh.normal.every(Number.isFinite),label+' normal');console.log(label+': '+mesh.position.length/9+' triangles');};
 const b=new m.MeshBuilder();m.moonGate(b,.24,.32);valid('moon gate',b.build());
@@ -21,6 +21,10 @@ const key=save.U(12,1,12), input={cells:[key],mode:(_,d)=>d===0||d===2?'eave':'r
 assert(f.heightAt(key,12,11.9)-old.heightAt(key,12,11.9)>f.heightAt(key,12.5,11.9)-old.heightAt(key,12.5,11.9));
 const tower=new m.MeshBuilder();const anchors=m.towerCap(tower,.33,{roof:'#414b49',vary:.5});
 valid('layered tower eaves',tower.build());assert(anchors['tower-top'].every(Number.isFinite));
+const vent=m.chimney.build({variant:'plain'},ctx);
+valid('low stove vent',vent.mesh);assert(vent.anchors['chimney-top'][13] < .2);
+const octagon=[[0,0],[1,0],[2,1],[2,2],[1,3],[0,3],[-1,2],[-1,1]];
+assert(m.pavilionHeight(1,.4,0,octagon[0],octagon)>m.pavilionHeight(1,.4,0,[.5,0],octagon)+.1);
 
 const outfits=new Map();
 for(let seed=1;seed<=40;seed++)for(const child of [false,true]){
