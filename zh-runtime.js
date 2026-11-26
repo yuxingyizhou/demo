@@ -4,6 +4,10 @@
   const dict = new Map(Object.entries(window.LC_ZH || {}));
   const lower = new Map([...dict].map(([a,b])=>[a.toLowerCase(),b]));
   const find = s => dict.get(s) ?? lower.get(s.toLowerCase());
+  const galleryName = name => {
+    const key = name.toLowerCase().split('.').at(-1);
+    return find('gallery:' + key) ?? find(key) ?? find(key.replaceAll('-', ' '));
+  };
   const translate = original => {
     if (!original) return original;
     const s = original.trim();
@@ -29,6 +33,8 @@
       else if ((m=s.match(/^Style \((\d+) modules\)$/))) out=`风格（${m[1]} 个模块）`;
       else if ((m=s.match(/^(\d+) icons$/))) out=`${m[1]} 个图标`;
       else if ((m=s.match(/^This entry could not be built: (.+)$/))) out='无法预览此条目：'+m[1];
+      else if ((m=s.match(/^view (\d+)$/))) out='视角 '+m[1];
+      else if ((m=s.match(/^(tier|priority) (-?\d+)$/))) out=(m[1]==='tier'?'层级 ':'优先级 ')+m[2];
       else if ((m=s.match(/^Town (\d+)$/))) out='小镇 '+m[1];
       else if ((m=s.match(/^(.+) \(from the old address\)$/))) out=m[1]+'（从原地址迁移）';
       else if ((m=s.match(/^(.+): (.+)$/)) && find(m[1]) && find(m[2])) out=find(m[1])+'：'+find(m[2]);
@@ -42,10 +48,23 @@
   };
   const attrs=['title','aria-label','aria-description','aria-valuetext','placeholder','alt'];
   const excluded='script,style,svg,canvas,input,textarea,pre,code,[contenteditable],.lc-town-name';
+  function translateGallery(e, value) {
+    const s = value.trim();
+    if (e.matches('.g-entry > span,.g-icons figcaption')) {
+      return galleryName(s) ?? translate(value);
+    }
+    if (e.matches('.g-entry > small')) return s.split(' · ').map(translate).join(' · ');
+    if (e.matches('.g-title')) {
+      const match = s.match(/^([^:]+): (.+)$/);
+      if (match) return `${translate(match[1])}：${galleryName(match[2]) ?? match[2]}`;
+    }
+    if (e.matches('.g-about')) return s.split(' — ').map(translate).join(' — ');
+    return translate(value);
+  }
   function textNode(n) {
     const p=n.parentElement;
     if (!p || p.closest(excluded)) return;
-    const old=n.nodeValue, next=translate(old);
+    const old=n.nodeValue, next=p.closest('#gallery')?translateGallery(p,old):translate(old);
     if (old!==next) n.nodeValue=next;
   }
   function element(e) {
