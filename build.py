@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """Build the Simplified Chinese static site from the pinned upstream release or a local ZIP."""
 import argparse
-import hashlib
-import html
 import json
 import os
 import re
@@ -12,7 +10,7 @@ import tempfile
 import urllib.request
 import zipfile
 from pathlib import Path
-from bs4 import BeautifulSoup, NavigableString, Comment
+from bs4 import BeautifulSoup, Comment, Doctype, NavigableString
 
 ROOT = Path(__file__).resolve().parent
 REV = "af6eac24ff21cbf027d4d33fd8219237a559f5b5"
@@ -72,6 +70,7 @@ def build(source):
         en=heading.removesuffix(" in Little City")
         condition=soup.select_one("p.how").get_text(" ",strip=True).removeprefix("How to get it:").strip()
         ui[en]=name
+        ui[en+" in Little City"]=name+"（小小城镇）"
         ui[heading]=name+"：获得方式"
         ui[en+" in Little City, drawn in ink and pencil"]=name+"（手绘）"
         ui[condition]=how
@@ -110,7 +109,7 @@ def build(source):
             if soup.title:
                 soup.title.string=name+"：获得方式 | 小小城镇图鉴"
         for n in list(soup.find_all(string=True)):
-            if isinstance(n,Comment) or not isinstance(n,NavigableString) or n.parent is None or n.parent.name in ("script","style","pre","code","svg"):
+            if isinstance(n,(Comment,Doctype)) or not isinstance(n,NavigableString) or n.parent is None or n.parent.name in ("script","style","pre","code","svg"):
                 continue
             old=str(n)
             new=trans(old)
@@ -124,14 +123,18 @@ def build(source):
                     tag[attr]=trans(tag[attr])
         for m in soup.find_all("meta"):
             key=m.get("name") or m.get("property") or ""
-            if "content" not in m:
+            if not m.has_attr("content"):
                 continue
             if key in ("description","og:description","twitter:description"):
                 m["content"]=pages[p][1] if p in pages else trans(m["content"])
             elif key in ("og:title","twitter:title"):
                 m["content"]=soup.title.get_text() if soup.title else trans(m["content"])
+            elif key == "og:image:alt" and p in pages:
+                m["content"]=pages[p][0]+"（小小城镇）"
             elif key in ("og:site_name","application-name","apple-mobile-web-app-title","og:image:alt"):
                 m["content"]=trans(m["content"])
+            elif key == "og:locale":
+                m["content"]="zh_CN"
             elif key in ("og:url","og:image","og:video","og:video:secure_url","twitter:image"):
                 m["content"]=m["content"].replace("https://littlecity.io",origin)
         for link in soup.find_all("link",rel="canonical"):
@@ -192,7 +195,7 @@ def build(source):
     assert len(list((OUT/"guide").glob("*/index.html")))==102
     report={"guide_entries":len(guide),"dictionary_entries":len(ui),"html_pages":len(list(OUT.rglob("*.html"))),"unmatched_static_text":sorted(x for x in missing if x)}
     (ROOT/"localization-report.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
-    print(json.dumps(report,ensure_ascii=False,indent=2))
+    print(json.dumps(report,indent=2))
     print("Static site ready:",OUT)
 
 if __name__=="__main__":
