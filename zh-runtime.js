@@ -43,6 +43,10 @@
       else if ((m=s.match(/^there is already a (.+) there$/))) out='此处已有'+(find(m[1])||'其他构件');
       else if ((m=s.match(/^it is already a (.+)$/))) out='此处已是'+(find(m[1])||'所选类型');
       else if ((m=s.match(/^(.+) It is kept here; a newer Little City may open it\.$/))) out=(find(m[1])||'无法打开此存档。')+'存档仍保留在这里，较新版本可能可以打开。';
+      else if ((m=s.match(/^凉亭无法放置：([A-Za-z].+)$/))) {
+        const reason = translate(m[1]);
+        out='凉亭无法放置：'+(reason===m[1]?'该位置不符合建造条件':reason);
+      }
       else if ((m=s.match(/^(.+) in Little City(?:, drawn in ink and pencil)?$/)) && find(m[1])) out='小小城镇中的'+find(m[1]);
       else if ((m=s.match(/^(.+) is one of the things a town does by itself in Little City,/)) && find(m[1])) out=find(m[1])+'是小镇会自行发生的活动。只需建造合适的场所，活动便会自动发生。';
       else if ((m=s.match(/^Tap − and \+ to make (.+) (longer|shorter|wider|narrower)$/))) out='点击 − 与 + 调整'+(find(m[1])||'范围');
