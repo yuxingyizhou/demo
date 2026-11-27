@@ -93,7 +93,10 @@ export function waterTown(spec, api) {
       for (let z = from; z <= to; z++) {
         block(frontage, 1, z, 'house', color, style);
         block(frontage + offset, 1, z, 'house', color, style);
-        if (color !== 4 && (color !== 7 || side === 0)) block(frontage, 2, z, 'house', color, style);
+        if (color !== 4 && (color !== 7 || side === 0)) {
+          block(frontage, 2, z, 'house', color, style);
+          block(frontage + offset, 2, z, 'house', color, style);
+        }
       }
     }
   }
@@ -103,9 +106,9 @@ export function waterTown(spec, api) {
     for (let x = Math.min(start, end); x <= Math.max(start, end); x++) floor(x, z);
   }
   for (const [x, z, color, style] of [[34, 15, 3, 2], [12, 19, 5, 5], [13, 31, 1, 1], [35, 35, 2, 3]]) {
-    for (const dx of [0, 1]) for (const dz of [0, 1]) block(x + dx, 1, z + dz, 'house', color, style);
-    block(x, 2, z, 'house', color, style);
-    block(x + 1, 2, z, 'house', color, style);
+    for (const dy of [1, 2]) {
+      for (const dx of [0, 1]) for (const dz of [0, 1]) block(x + dx, dy, z + dz, 'house', color, style);
+    }
   }
 
   for (const [z, side] of landings) {

@@ -15,8 +15,11 @@ def apply(root):
             raise ValueError(f'{label}: expected one mesh anchor, found {count}')
         source = source.replace(before, after, 1)
 
+    replace('dwelling features', 'floorAt:o,edgeAt:s,supports:c},n.rules??HU(),n)',
+            'floorAt:o,edgeAt:s,supports:c},jiangnanDwellingRules(n.rules??HU()),n)')
     replace('canal traffic', 'function GW(e,t={}){return HW(e,FU(e,t.rules??HU(),{buildNav:rO},t))}',
-            'function GW(e,t={}){return HW(e,FU(e,jiangnanWaterRules(e.world,t.rules??HU()),{buildNav:rO},t))}')
+            'function GW(e,t={}){return HW(e,FU(e,jiangnanWaterRules(e.world,'
+            'jiangnanDwellingRules(t.rules??HU())),{buildNav:rO},t))}')
     replace('canal moorings', '!n[p(c+a,l+o)]&&!r(c+a,l+o)||[.7,1.1,1.5].some',
             '!jiangnanIsWaterTown(e.world)&&!n[p(c+a,l+o)]&&!r(c+a,l+o)||[.7,1.1,1.5].some')
 
@@ -36,7 +39,29 @@ def apply(root):
             'n.at(F(0,0,f+.004),()=>jiangnanReedHat(n,Yr,s+.161,.063))')
 
     replace('roof section', 'i<0?Math.min(.065,-i*.55):-.24*v*d*o*(1-o)',
-            'jiangnanRoofLift(i,d,v,o,c)')
+            'jiangnanRoofLift(i,d,v,o,c,e.hardGable)')
+    replace('roof silhouette',
+            'if(g===`stepped-gable`&&u!==1)g=`gable`;if(g===`gable`&&u===1&&o!==`chapel`&&o!==`barn`&&o!==`greenhouse`&&r.rectangular&&r.pierced.length===0)g=`stepped-gable`;',
+            'if(g===`stepped-gable`)g=`gable`;'
+            'if(g===`hip`&&r.rectangular&&r.pierced.length===0&&!['
+            '`chapel`,`greenhouse`,`manor`,`town-hall`].includes(o))g=`gable`;'
+            'if(g===`gable`&&r.rectangular&&r.pierced.length===0&&'
+            '![`chapel`,`barn`,`greenhouse`].includes(o)&&'
+            '(u===1&&s||u===2&&jiangnanIsWaterTown(n.facts.world)&&[`inn`,`shop`].includes(o))&&'
+            'k(a.seed,`fire-gable`,r.index)<.4)g=`stepped-gable`;')
+    replace('hard-gable roof profile', 'p=tp({cells:m,mode:u,jiangnan:s.cover!==`glass`&&v!==`lean-to`,base:g-ge.eaveDrop,pitch:v===`lean-to`?ge.leanRise:void 0,',
+            'hardGable=v===`gable`&&c!==`chapel`&&s.cover!==`glass`,p=tp({cells:m,mode:u,hardGable,'
+            'jiangnan:s.cover!==`glass`&&v!==`lean-to`,base:g-ge.eaveDrop,'
+            'pitch:v===`lean-to`?ge.leanRise:hardGable ? .46 : void 0,')
+    replace('straight roof ridges', 'sag:Math.min(ge.sagMax,ge.sag*f),tilt:s.lean*.025,',
+            'sag:hardGable?0:Math.min(ge.sagMax,ge.sag*f),tilt:hardGable?0:s.lean*.025,')
+    replace('close tile ends to gable', 'eave:ge.eave,rake:ge.rake,into:ge.inset+.005',
+            'eave:ge.eave,rake:hardGable?0:ge.rake,into:ge.inset+.005')
+    replace('render plaster hard gable', 'o.at(R(s,F(0,i-c(n.cell)*h,0)),()=>{if(!a){let e=[u,0,d];',
+            'const hardGable=t.input.hardGable&&t.mode(n.cell,n.dir)===`rake`&&r>0;'
+            'o.at(R(s,F(0,i-c(n.cell)*h,0)),()=>{if(hardGable)'
+            'return jiangnanHardGable(o,f,u,d,r,l.color,z.plaster,z.shingles);'
+            'if(!a){let e=[u,0,d];')
     replace('roof normals', 'e.tri(y,b,x,S===void 0?{normals:[_,_,_]}:{normals:[_,_,_],colors:[S,S,S]})',
             'let N=t.input.jiangnan?jiangnanRoofNormal(y,b,x,_):_;'
             'e.tri(y,b,x,S===void 0?{normals:[N,N,N]}:{normals:[N,N,N],colors:[S,S,S]})')
@@ -49,9 +74,32 @@ def apply(root):
             'n.with({color:`#705745`,ink:`lattice`},()=>{for(let j of [1/3,2/3]){fs(n,e+(t-e)*j,r,e+(t-e)*j,i,.015,c);fs(n,e,r+(i-r)*j,t,r+(i-r)*j,.015,c)}})',
             'jiangnanLattice(n,fs,e,t,r,i,c,`grid`)')
     replace('square lattice', 'd(as(.33,.37,e),.042,(e,t,r,i)=>{fs(n,0,r,0,i,.022,c),fs(n,e,(r+i)/2,t,(r+i)/2,.022,c)})',
-            'd(as(.33,.37,e),.042,(e,t,r,i)=>jiangnanLattice(n,fs,e,t,r,i,c,`diamond`))')
+            'd(as(.33,.37,e),.042,(e,t,r,i)=>jiangnanTimberFront(n,fs,0,r,t-e,i-r,c))')
+    replace('window forms', 'f=(e,n,i)=>{let a=t.feature({type:`window`,structure:r.id,cell:e,dir:n,variant:i}),o=i===`shopfront`?',
+            'f=(e,n,variant)=>{if(i!==`chapel`&&variant===`round`)return;'
+            'if(i!==`chapel`&&i!==`barn`&&n!==d?.dir&&gableEnds.get(e&4095)?.has(n))return;'
+            'const form=i!==`chapel`&&i!==`barn`&&[`bay`,`arched`,`pointed`,`shuttered`].includes(variant)?`tall`:variant;'
+            'let a=t.feature({type:`window`,structure:r.id,cell:e,dir:n,variant:form}),o=form===`shopfront`?')
+    replace('identify blank gable ends', 'dir:n})},p=pk(n.facts),h=new Set;',
+            'dir:n})},p=pk(n.facts),h=new Set,gableEnds=new Map;'
+            'for(const region of Hf(n.facts).byStructure.get(r.id)??[]){'
+            'const roof=YA(n.plan,region);if(!roof||![`gable`,`stepped-gable`].includes(roof.variant))continue;'
+            'const cells=new Set(region.cells),ends=roof.params?.ridge===`x`?[1,3]:[0,2];'
+            'for(const cell of cells){const dirs=ends.filter(dir=>!cells.has(M(cell,dir)));'
+            'if(dirs.length)gableEnds.set(cell&4095,new Set(dirs))}}')
     replace('shop lattice', 'fs(n,.13,.16,.13,.47,.022,.052),n.with({color:r.accent,ink:`board`}',
-            'jiangnanLattice(n,fs,-.1,.36,.16,.47,.056,`grid`),n.with({color:r.accent,ink:`board`}')
+            'jiangnanTimberFront(n,fs,.13,.16,.46,.31,.056),n.with({color:r.accent,ink:`board`}')
+    replace('full shop window panels', 'd(as(.74,.39,e+.13),.04,(e,t,r,i)=>{fs(n,e+(t-e)/3,r,e+(t-e)/3,i,.022,c),fs(n,e+(t-e)*2/3,r,e+(t-e)*2/3,i,.022,c)})',
+            'd(as(.74,.39,e+.13),.04,(e,t,r,i)=>jiangnanTimberFront(n,fs,0,r,t-e,i-r,c))')
+    awning = source.index('prop:`awning`,build(e,t){')
+    awning_end = source.index('}),fb=P({default:()=>pb})', awning)
+    replace('tiled shop awning', source[awning:awning_end],
+            'prop:`awning`,build(e,t){let n=t.mesh();jiangnanTiledAwning(n,z.shingles);return{mesh:n.build()}}')
+    stall = source.index('function Hm(e,t){')
+    stall_end = source.index('function Um(e,t){', stall)
+    replace('tiled market stall', source[stall:stall_end],
+            'function Hm(e){e.rigid(()=>jiangnanTiledStall(e.b,Ud.halfWidth,'
+            '[Ud.backY,Ud.backZ],[Ud.ridgeY,Ud.ridgeZ],[Ud.frontY,Ud.frontZ],z.shingles))}')
     replace('entry frame', 'if(n.setColor(r.trim).setInk(`frame`),a===`double`)',
             'const role=t.structure&&t.plan.roles.get(t.structure.id)?.role;'
             'if(a===`shop`||a===`double`&&s&&[`town-hall`,`manor`,`inn`,`schoolhouse`].includes(role))'
@@ -61,6 +109,10 @@ def apply(root):
             'a=e.variant??`plain`,o=.32;'
             'if(a===`plain`){jiangnanStoveVent(n,z.shingles);return {mesh:n.build(),anchors:{"chimney-top":F(0,.14,0)}}}'
             'if(a===`pipe`)')
+    replace('short roof vents along the canal', 'c=!s&&o>=1&&o<=2&&n.rand(`flue`,e)<.6&&v++===0,',
+            'c=!s&&!jiangnanIsWaterTown(n.facts.world)&&o>=1&&o<=2&&n.rand(`flue`,e)<.6&&v++===0,')
+    replace('omit canal maypole', 'for(let e of m)if(o.put({type:`maypole`',
+            'if(!jiangnanIsWaterTown(e.world))for(let e of m)if(o.put({type:`maypole`')
 
     replace('pavilion field', 'let s=.045,c=e=>r+e*t.pitch+.06*Math.exp(-Math.max(0,e)*5),l=i??1/0;',
             'let s=.045,outline=sm(t.outline,n),corners=t.round||t.hubs.length===1?outline:[],'
@@ -89,6 +141,9 @@ def apply(root):
     bundle.write_text('import {waterTownRules as jiangnanWaterRules,isWaterTown as jiangnanIsWaterTown} from "./water-town.mjs";\n'
                       'import {roofLift as jiangnanRoofLift,roofNormal as jiangnanRoofNormal,'
                       'tileEnds as jiangnanTileEnds,lattice as jiangnanLattice,entryFrame as jiangnanEntry,'
+                      'dwellingRules as jiangnanDwellingRules,hardGable as jiangnanHardGable,'
+                      'tiledAwning as jiangnanTiledAwning,tiledStall as jiangnanTiledStall,'
+                      'timberShopFront as jiangnanTimberFront,'
                       'pavilionHeight as jiangnanPavilionHeight,towerEaves as jiangnanTowerEaves,'
                       'stoveVent as jiangnanStoveVent} '
                       'from "./jiangnan-buildings.mjs";\n'

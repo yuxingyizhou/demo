@@ -47,6 +47,17 @@ for (const preset of PRESETS) {
     assert(dressing.actors.some(actor => actor.type === 'rowboat'));
     assert(!dressing.actors.some(actor => actor.type === 'sailboat' ||
       actor.type === 'ship-call' && actor.variant !== 'barge'));
+    const roofs = shape.features.filter(feature => feature.type === 'roof');
+    const hardGables = roofs.filter(roof => roof.variant === 'gable');
+    assert(hardGables.length > roofs.length / 2);
+    assert(roofs.length > hardGables.length);
+    assert(roofs.every(roof => roof.variant === 'gable' || roof.variant === 'stepped-gable'));
+    const windows = shape.features.filter(feature => feature.type === 'window');
+    assert(windows.some(window => window.variant === 'shopfront'));
+    assert(windows.every(window => ['square', 'tall', 'shopfront'].includes(window.variant)));
+    assert(!shape.features.some(feature => ['corner-oriel', 'dormer', 'balcony'].includes(feature.type) ||
+      feature.type === 'chimney' && feature.variant !== 'plain'));
+    assert(!dressing.props.some(prop => prop.type === 'maypole' || prop.type === 'terrace-set'));
     assert.equal(nav.mainEntrancesReachable, nav.mainEntrances);
     assert(encoded.length < 6000);
   }

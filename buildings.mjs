@@ -1,12 +1,20 @@
 const timber = '#5d4437';
 const stone = '#b6b5a5';
+const tile = '#46504e';
+const rebuiltDetails = new Set(['U09.vista-end', 'U10.corners', 'J05.roof-terrace', 'J10.dormers', 'D28.terrace-furniture']);
+const adaptedRules = new WeakMap();
 
-export function roofLift(distance, span, pitch, across, along) {
+export function dwellingRules(rules) {
+  if (!adaptedRules.has(rules)) adaptedRules.set(rules, rules.filter(rule => !rebuiltDetails.has(rule.id)));
+  return adaptedRules.get(rules);
+}
+
+export function roofLift(distance, span, pitch, across, along, hardGable = false) {
   const corner = Math.max(0, Math.abs(along - .5) * 2 - .7) / .3;
   if (distance < 0) {
-    return Math.min(.105, -distance * (.27 + .75 * corner));
+    return hardGable ? 0 : Math.min(.062, -distance * (.17 + .28 * corner));
   }
-  return -.29 * pitch * span * across * (1 - across);
+  return (hardGable ? -.16 : -.29) * pitch * span * across * (1 - across);
 }
 
 export function roofNormal(a, b, c, fallback) {
@@ -77,6 +85,91 @@ export function entryFrame(mesh, roofColor, style, tilePattern) {
   mesh.with({color: stone, ink: 'portal-bases'}, () => {
     for (const x of [-half, half]) {
       mesh.box([x - .034, .022, .035], [x + .034, .08, .09]);
+    }
+  });
+}
+
+export function hardGable(mesh, sample, from, to, depth, plasterColor, plaster, shingles) {
+  const outside = -depth + .035;
+  const inside = -depth - .065;
+  const steps = 4;
+  for (let index = 0; index < steps; index++) {
+    const left = from + (to - from) * index / steps;
+    const right = from + (to - from) * (index + 1) / steps;
+    const a = Math.max(0, sample(left)) + .076;
+    const b = Math.max(0, sample(right)) + .076;
+    mesh.with({color: plasterColor, pattern: plaster, ink: 'hard-gable-wall'}, () => {
+      mesh.quad([left, 0, outside], [right, 0, outside], [right, b, outside], [left, a, outside]);
+      mesh.quad([right, 0, inside], [left, 0, inside], [left, a, inside], [right, b, inside]);
+      if (index === 0) mesh.quad([left, 0, inside], [left, 0, outside], [left, a, outside], [left, a, inside]);
+      if (index === steps - 1) mesh.quad([right, 0, outside], [right, 0, inside], [right, b, inside], [right, b, outside]);
+    });
+    mesh.with({color: tile, pattern: shingles, ink: 'gable-tile-coping'}, () => {
+      mesh.quad([left, a + .023, inside - .018], [left, a + .023, outside + .018],
+        [right, b + .023, outside + .018], [right, b + .023, inside - .018]);
+      mesh.quad([left, a, outside + .018], [right, b, outside + .018],
+        [right, b + .023, outside + .018], [left, a + .023, outside + .018]);
+      mesh.quad([right, b, inside - .018], [left, a, inside - .018],
+        [left, a + .023, inside - .018], [right, b + .023, inside - .018]);
+    });
+  }
+}
+
+function tiledSlope(mesh, halfWidth, back, front, pattern) {
+  const [backY, backZ] = back;
+  const [frontY, frontZ] = front;
+  mesh.with({color: tile, pattern, ink: 'grey-tile-slope'}, () => {
+    mesh.quad([-halfWidth, backY, backZ], [-halfWidth, frontY, frontZ],
+      [halfWidth, frontY, frontZ], [halfWidth, backY, backZ]);
+    mesh.quad([halfWidth, backY - .023, backZ], [halfWidth, frontY - .023, frontZ],
+      [-halfWidth, frontY - .023, frontZ], [-halfWidth, backY - .023, backZ]);
+    mesh.box([-halfWidth, frontY - .033, frontZ - .008], [halfWidth, frontY, frontZ + .008]);
+  });
+  const count = Math.ceil(halfWidth * 20);
+  mesh.with({color: '#545e58', pattern, ink: 'tile-joints'}, () => {
+    for (let index = 0; index < count; index++) {
+      const x = halfWidth * (2 * (index + .5) / count - 1);
+      mesh.tri([x - .009, frontY + .003, frontZ], [x + .009, frontY + .003, frontZ],
+        [x, backY + .013, backZ]);
+    }
+  });
+}
+
+export function tiledAwning(mesh, shingles) {
+  tiledSlope(mesh, .4, [.063, 0], [-.085, .31], shingles);
+  mesh.with({color: timber, ink: 'awning-brackets'}, () => {
+    for (const x of [-.28, .28]) {
+      mesh.box([x - .022, -.09, 0], [x + .022, -.059, .289]);
+      mesh.tri([x - .022, -.21, 0], [x - .022, -.09, 0], [x - .022, -.09, .207]);
+      mesh.tri([x + .022, -.09, .207], [x + .022, -.09, 0], [x + .022, -.21, 0]);
+    }
+  });
+}
+
+export function tiledStall(mesh, halfWidth, back, ridge, front, shingles) {
+  mesh.with({color: timber, ink: 'market-posts'}, () => {
+    for (const x of [-halfWidth + .055, halfWidth - .055]) {
+      for (const [y, z] of [back, front]) {
+        const post = z + (z < ridge[1] ? .055 : -.065);
+        mesh.box([x - .024, 0, post - .024], [x + .024, y, post + .024]);
+      }
+    }
+  });
+  tiledSlope(mesh, halfWidth, ridge, front, shingles);
+  // The other slope faces the rear of the stall.
+  tiledSlope(mesh, halfWidth, back, ridge, shingles);
+  mesh.with({color: tile, ink: 'market-tile-ridge'}, () =>
+    mesh.box([-halfWidth, ridge[0] - .012, ridge[1] - .022], [halfWidth, ridge[0] + .022, ridge[1] + .022]));
+}
+
+export function timberShopFront(mesh, bars, center, low, width, height, depth) {
+  const left = center - width / 2;
+  const right = center + width / 2;
+  mesh.with({color: timber, ink: 'paneled-storefront'}, () => {
+    for (const x of [left, center, right]) bars(mesh, x, low, x, low + height, .027, depth);
+    for (const y of [low, low + height * .38, low + height]) bars(mesh, left, y, right, y, .02, depth);
+    for (const x of [left + width / 4, right - width / 4]) {
+      bars(mesh, x, low + height * .38, x, low + height, .013, depth);
     }
   });
 }
