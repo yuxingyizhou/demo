@@ -1,6 +1,5 @@
-// V5: three distinct native-edit districts. No new save types or fake placement APIs.
+// Native-edit districts for the rural and garden presets.
 const layouts={
- canal:{name:'沿街集市',x:23,z:12,h:1,entry:'N',rows:['spps','gqqg','hqqh','pppp']},
  village:{name:'田园菜圃',x:30,z:32,h:1,entry:'N',rows:['ggpgg','ggpgg','ggpgg','ggpgg','hhphh']},
  garden:{name:'围合园林',x:11,z:14,h:1,entry:'E',rows:['ggggg','gttgg','gttpp','ggpgg','ggpgg']}
 };
@@ -20,8 +19,7 @@ export function addDistrict(result,id,api){
   const cell=key(x+i,h,z+j),kind=rows[j][i],floor=world.floors.get(cell),want=kind==='p'?'path':kind==='q'?'plaza':kind==='g'?'garden':null;
   if(floor&&floor!==want)edit({type:'eraseFloor',cell});
   if(want&&floor!==want)edit({type:'placeFloor',cell,floor:want});
-  if(kind==='s')edit({type:'placeBlock',cell,kind:'stall',color:0});
-  if(kind==='h')edit({type:'placeBlock',cell,kind:'house',color:id==='canal'?(i===0?0:5):(i<2?2:7),style:id==='canal'?3:5});
+  if(kind==='h')edit({type:'placeBlock',cell,kind:'house',color:i<2?2:7,style:5});
   if(kind==='t'){edit({type:'placeBlock',cell,kind:'pillar',color:2});edit({type:'placeBlock',cell:cell+4096,kind:'pillar',color:2});}
  }
  for(let j=0;j<d;j++)for(let i=0;i<w;i++)if(rows[j][i]==='t')edit({type:'placeBlock',cell:key(x+i,h+2,z+j),kind:'marble',color:0});

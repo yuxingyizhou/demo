@@ -1,6 +1,6 @@
 """Apply V5 to the pinned V4 build. Reusable on fresh V4 only."""
 from pathlib import Path
-import shutil, sys
+import sys
 
 def apply(root):
     root=Path(root); assets=root/'assets'; app=next(assets.glob('app-*.js')); s=app.read_text(encoding='utf-8')
@@ -8,10 +8,9 @@ def apply(root):
         nonlocal s
         if s.count(old)!=1: raise ValueError((old[:120],s.count(old)))
         s=s.replace(old,new,1)
-    shutil.copyfile(Path(__file__).with_name('districts.mjs'),assets/'jiangnan-districts.mjs')
     patch('import {PRESETS as jiangnanPresets,presetPlan as jiangnanPlan,nativeSceneAPI as jiangnanEngine} from "./jiangnan-scene.mjs";', '''import {PRESETS as jiangnanPresets,presetPlan as jiangnanBase,nativeSceneAPI as jiangnanEngine} from "./jiangnan-scene.mjs";
-import {addDistrict as jiangnanDistrict,pavilionPlan as jiangnanPavilion} from "./jiangnan-districts.mjs";
-const jiangnanPlan=(id,api)=>jiangnanDistrict(jiangnanBase(id,api),id,api);''')
+import {addDistrict as jiangnanDistrict,pavilionPlan as jiangnanPavilion} from "./districts.mjs";
+const jiangnanPlan=(id,api)=>{const base=jiangnanBase(id,api);return id===`canal`?base:jiangnanDistrict(base,id,api)};''')
     # Explicitly distinguish native tools from automatic components; macro state belongs to tray.
     patch('setIdle(e){n.idle!==e&&(n.idle=e,S(),i())},select(e){let t=hr(e)', 'setIdle(e){n.idle!==e&&(n.idle=e,n.stamp=null,S(),i())},selectStamp(){w.select(`pillar`);n.stamp=`pavilion`;i()},select(e){n.stamp=null;let t=hr(e)')
     patch('[`dock`,`乌篷船`,`在可通航水面放置码头，等待船只生成。`]', '[`dock`,`码头`,`在可通航水面放置码头，等待船只生成。`]')

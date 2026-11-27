@@ -1,7 +1,9 @@
 // Explicit, bounded presets on the original engine. Dependencies injected for headless tests.
-export const PRESETS=[{id:'canal',name:'枕水古镇',seed:46},{id:'village',name:'田园水村',seed:8},{id:'garden',name:'园林水镇',seed:163}];
+import {waterTown,waterTownSeed} from './water-town.mjs';
+export const PRESETS=[{id:'canal',name:'枕水古镇',seed:waterTownSeed},{id:'village',name:'田园水村',seed:8},{id:'garden',name:'园林水镇',seed:163}];
 export function presetPlan(id,api){
  const spec=PRESETS.find(x=>x.id===id);if(!spec)throw new Error('未知场景模板');
+ if(id==='canal')return waterTown(spec,api);
  const seed=spec.seed,t=api.terrain(seed,2),base=api.grow(t,seed,{character:'river'});
  if(base.fellBack||base.refused||base.unjoined.length)throw new Error('基础场景规划未通过检查');
  const empty=()=>({version:1,seed,terrainGen:2,nextSeq:1,blocks:new Map(),floors:new Map(),edges:new Map()});

@@ -1,3 +1,55 @@
-import assert from 'node:assert/strict';import fs from 'node:fs';import path from 'node:path';import {pathToFileURL} from 'node:url';import {PRESETS,presetPlan} from './scene.mjs';
-const assets=path.resolve(process.argv[2]||'dist','assets'),bundle=fs.readdirSync(assets).find(x=>x.startsWith('field-basketball.scenario-')&&x.endsWith('.js'));const f=await import(pathToFileURL(path.join(assets,bundle)));const s=await import(pathToFileURL(path.join(assets,fs.readdirSync(assets).find(x=>x.startsWith('save-')&&x.endsWith('.js')))));const api={terrain:f.Z,grow:f.L,resolve:f.nt,apply:f.rt,can:f.at};
-for(const p of PRESETS){const result=presetPlan(p.id,api);const {seed,plan,audit,world,terrain}=result;assert.equal(plan.unjoined.length,0);assert.equal(plan.refused,0);assert(!plan.fellBack);assert.equal(audit.skipped.length,0);assert(!audit.roles.palm);let replay={version:1,seed,terrainGen:2,nextSeq:1,blocks:new Map(),floors:new Map(),edges:new Map()};for(const e of plan.edits){assert(api.can(replay,terrain,e).ok);replay=api.apply(replay,terrain,e)}assert.deepEqual(replay,world);const decoded=s.n(s.r(world));assert(decoded.ok);assert.deepEqual(decoded.world.blocks,world.blocks);assert.deepEqual(decoded.world.floors,world.floors);assert.deepEqual(decoded.world.edges,world.edges);const dressing=f.tt(api.resolve(world,terrain));const nav=dressing.nav;const counts=new Map();for(const part of nav.part)counts.set(part,(counts.get(part)??0)+1);const main=Math.max(...counts.values());assert(main/nav.nodes.length>=.8);assert(dressing.props.some(x=>x.type==='lamp'));assert(dressing.actors.length>0);console.log(JSON.stringify({id:p.id,seed,edits:plan.edits.length,...audit,main,navTotal:nav.nodes.length,doors:nav.doors.length,connectedDoors:nav.doors.filter(x=>x.node>=0).length,lamps:dressing.props.filter(x=>x.type==='lamp').length}));}
+import assert from 'node:assert/strict';
+import {readdirSync} from 'node:fs';
+import {resolve} from 'node:path';
+import {pathToFileURL} from 'node:url';
+import {navAudit} from './districts.mjs';
+
+const assets = resolve(process.argv[2] || 'dist', 'assets');
+const load = name => import(pathToFileURL(resolve(assets, name)));
+const files = readdirSync(assets);
+const engine = await load(files.find(name => name.startsWith('field-basketball.scenario-') && name.endsWith('.js')));
+const save = await load(files.find(name => name.startsWith('save-') && name.endsWith('.js')));
+const {PRESETS, presetPlan, nativeSceneAPI: api} = await load('jiangnan-scene.mjs');
+
+for (const preset of PRESETS) {
+  const {seed, plan, audit, world, terrain, initialWorld} = presetPlan(preset.id, api);
+  assert.equal(plan.unjoined.length, 0);
+  assert.equal(plan.refused, 0);
+  assert(!plan.fellBack);
+  assert.equal(audit.skipped.length, 0);
+
+  let replay = initialWorld ?? {version: 1, seed, terrainGen: 2, nextSeq: 1,
+    blocks: new Map(), floors: new Map(), edges: new Map()};
+  for (const edit of plan.edits) {
+    assert(api.can(replay, terrain, edit).ok);
+    replay = api.apply(replay, terrain, edit);
+  }
+  assert.deepEqual(replay, world);
+  const encoded = save.r(world);
+  const decoded = save.n(encoded);
+  assert(decoded.ok);
+  assert.deepEqual(decoded.world, world);
+  assert.deepEqual(api.terrainFromWorld(decoded.world).height, terrain.height);
+
+  const shape = api.resolve(world, terrain);
+  const dressing = engine.tt(shape);
+  const nav = navAudit(dressing.nav);
+  const lamps = dressing.props.filter(prop => prop.type === 'lamp').length;
+  assert(nav.main / nav.navTotal >= .8);
+  assert(lamps > 0);
+  assert(dressing.actors.some(actor => actor.type === 'resident'));
+
+  if (preset.id === 'canal') {
+    assert.equal(audit.roles['stone-bridge'], 3);
+    assert.equal(audit.roles.bandstand, 1);
+    assert(audit.roles.willow >= 8);
+    assert.equal(audit.roles.jetty, 4);
+    assert(dressing.actors.some(actor => actor.type === 'rowboat'));
+    assert(!dressing.actors.some(actor => actor.type === 'sailboat' ||
+      actor.type === 'ship-call' && actor.variant !== 'barge'));
+    assert.equal(nav.mainEntrancesReachable, nav.mainEntrances);
+    assert(encoded.length < 6000);
+  }
+
+  console.log(JSON.stringify({id: preset.id, seed, edits: plan.edits.length, ...audit, ...nav, lamps}));
+}

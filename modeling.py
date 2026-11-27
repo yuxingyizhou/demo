@@ -15,6 +15,11 @@ def apply(root):
             raise ValueError(f'{label}: expected one mesh anchor, found {count}')
         source = source.replace(before, after, 1)
 
+    replace('canal traffic', 'function GW(e,t={}){return HW(e,FU(e,t.rules??HU(),{buildNav:rO},t))}',
+            'function GW(e,t={}){return HW(e,FU(e,jiangnanWaterRules(e.world,t.rules??HU()),{buildNav:rO},t))}')
+    replace('canal moorings', '!n[p(c+a,l+o)]&&!r(c+a,l+o)||[.7,1.1,1.5].some',
+            '!jiangnanIsWaterTown(e.world)&&!n[p(c+a,l+o)]&&!r(c+a,l+o)||[.7,1.1,1.5].some')
+
     replace('resident style', 's=n(`hat`),c=s<.14?`straw`:s<.24?`cap`:s<.3?`bobble`:`none`;return{skin:Bi(wr.skin,n(`skin`))',
             'outfit=jiangnanOutfit(n(`clothing`),t);return{jiangnan:outfit,skin:Bi(wr.skin,n(`skin`))')
     replace('resident hat state', 'hairStyle:o,hat:c,hatColor:Bi(wr.hats',
@@ -81,7 +86,8 @@ def apply(root):
 
     for module in ('buildings', 'people'):
         shutil.copyfile(Path(__file__).with_name(f'{module}.mjs'), assets / f'jiangnan-{module}.mjs')
-    bundle.write_text('import {roofLift as jiangnanRoofLift,roofNormal as jiangnanRoofNormal,'
+    bundle.write_text('import {waterTownRules as jiangnanWaterRules,isWaterTown as jiangnanIsWaterTown} from "./water-town.mjs";\n'
+                      'import {roofLift as jiangnanRoofLift,roofNormal as jiangnanRoofNormal,'
                       'tileEnds as jiangnanTileEnds,lattice as jiangnanLattice,entryFrame as jiangnanEntry,'
                       'pavilionHeight as jiangnanPavilionHeight,towerEaves as jiangnanTowerEaves,'
                       'stoveVent as jiangnanStoveVent} '
