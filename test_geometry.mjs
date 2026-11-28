@@ -13,6 +13,11 @@ const valid=(label,mesh)=>{assert(mesh.position.length>0,label);assert(mesh.posi
 const b=new m.MeshBuilder();m.moonGate(b,.24,.32);valid('moon gate',b.build());
 const l=new m.MeshBuilder();assert(Math.abs(m.lantern(l,.2)-.125)<1e-9);valid('red lantern',l.build());
 const ctx={seed:123,rand:()=>.5,mesh:()=>new m.MeshBuilder()};valid('rowboat canopy',m.rowboat.build({params:{look:1}},ctx).mesh);valid('lattice window',m.windowPart.build({variant:'tall'},ctx).mesh);
+const canalBoat=m.rowboat.build({params:{look:1,canal:true}},ctx).mesh;
+valid('canal boat canopy',canalBoat);
+const riverWindow=m.windowPart.build({variant:'river-lattice',cell:save.U(12,1,12)}, {...ctx,rand:()=>.1});
+valid('riverview lattice and lantern',riverWindow.mesh);
+assert(riverWindow.anchors.window.every(Number.isFinite));
 const tall=m.windowPart.build({variant:'tall'},ctx),square=m.windowPart.build({variant:'square'},ctx);
 assert.notDeepEqual(tall.mesh.position,square.mesh.position);
 assert(tall.anchors.window.every(Number.isFinite));

@@ -16,12 +16,29 @@ def apply(root):
         source = source.replace(before, after, 1)
 
     replace('dwelling features', 'floorAt:o,edgeAt:s,supports:c},n.rules??HU(),n)',
-            'floorAt:o,edgeAt:s,supports:c},jiangnanDwellingRules(n.rules??HU()),n)')
+            'floorAt:o,edgeAt:s,supports:c},jiangnanWaterShapeRules(e,jiangnanDwellingRules(n.rules??HU())),n)')
     replace('canal traffic', 'function GW(e,t={}){return HW(e,FU(e,t.rules??HU(),{buildNav:rO},t))}',
             'function GW(e,t={}){return HW(e,FU(e,jiangnanWaterRules(e.world,'
             'jiangnanDwellingRules(t.rules??HU())),{buildNav:rO},t))}')
     replace('canal moorings', '!n[p(c+a,l+o)]&&!r(c+a,l+o)||[.7,1.1,1.5].some',
             '!jiangnanIsWaterTown(e.world)&&!n[p(c+a,l+o)]&&!r(c+a,l+o)||[.7,1.1,1.5].some')
+    replace('tag canal boats', 'line:hr.line,rank:e.data.rank,',
+            'line:hr.line,rank:e.data.rank,canal:jiangnanIsWaterTown(n.facts.world),')
+    replace('canal boat proportions', 'function es(){return{length:hr.rowLength,beam:hr.rowBeam,',
+            'function es(canal=false){return{length:hr.rowLength*(canal?1.4:1),beam:hr.rowBeam*(canal?1.42:1),')
+    replace('canal boat hull', 'actor:`rowboat`,build(e,t){let n=t.mesh(),r=Qo(e.params?.look),a=jt(n,es(),r);',
+            'actor:`rowboat`,build(e,t){let n=t.mesh(),r=Qo(e.params?.look),a=jt(n,es(e.params?.canal),r);')
+    replace('stone canal landing', 'return fl(i,e,t),Ga(i,r,e,t,n,e=>e.type===`ladder`?null:void 0),',
+            'const dock=jiangnanIsWaterTown(t.world)&&e.cells.length===1?al(e,t).get(e.cells[0]):null;'
+            'const bank=dock&&Mo.find(dir=>dock.side[dir]===`land`);'
+            'if(dock&&bank!==void 0)jiangnanStoneLanding(i,(across,depth)=>ol(dock,bank,across,-depth),h,fe,z.stone);'
+            'else fl(i,e,t);return Ga(i,r,e,t,n,e=>e.type===`ladder`?null:void 0),')
+    replace('pave the canal landing ramp', 'a=eb/$y;n.setPattern(z.none).setInk(`ramp`);',
+            'a=eb/$y;if(jiangnanIsWaterTown(t.plan.world)&&t.structure?.kind===`dock`&&t.structure.cells.length===1){'
+            'n.setPattern(z.stone).setInk(`stone-ramp`);'
+            'for(const [left,right,color] of [[-.432,-.149,`#b3b4a8`],[-.146,.147,`#bcc0b4`],[.15,.432,`#aeb3a8`]])'
+            'n.setColor(color).box([left,h-.018,-.09],[right,h+.021,.44],{skip:[`bottom`]});'
+            'return{mesh:n.build()}}n.setPattern(z.none).setInk(`ramp`);')
 
     replace('resident style', 's=n(`hat`),c=s<.14?`straw`:s<.24?`cap`:s<.3?`bobble`:`none`;return{skin:Bi(wr.skin,n(`skin`))',
             'outfit=jiangnanOutfit(n(`clothing`),t);return{jiangnan:outfit,skin:Bi(wr.skin,n(`skin`))')
@@ -43,12 +60,12 @@ def apply(root):
     replace('roof silhouette',
             'if(g===`stepped-gable`&&u!==1)g=`gable`;if(g===`gable`&&u===1&&o!==`chapel`&&o!==`barn`&&o!==`greenhouse`&&r.rectangular&&r.pierced.length===0)g=`stepped-gable`;',
             'if(g===`stepped-gable`)g=`gable`;'
-            'if(g===`hip`&&r.rectangular&&r.pierced.length===0&&!['
-            '`chapel`,`greenhouse`,`manor`,`town-hall`].includes(o))g=`gable`;'
+            'if(g===`hip`&&r.rectangular&&r.pierced.length===0&&'
+            '(jiangnanIsWaterTown(n.facts.world)||![`chapel`,`greenhouse`,`manor`,`town-hall`].includes(o)))g=`gable`;'
             'if(g===`gable`&&r.rectangular&&r.pierced.length===0&&'
             '![`chapel`,`barn`,`greenhouse`].includes(o)&&'
-            '(u===1&&s||u===2&&jiangnanIsWaterTown(n.facts.world)&&[`inn`,`shop`].includes(o))&&'
-            'k(a.seed,`fire-gable`,r.index)<.4)g=`stepped-gable`;')
+            '(u===1&&s||u<=3&&jiangnanIsWaterTown(n.facts.world)&&o!==`warehouse`)&&'
+            'k(a.seed,`fire-gable`,r.index)<.33)g=`stepped-gable`;')
     replace('hard-gable roof profile', 'p=tp({cells:m,mode:u,jiangnan:s.cover!==`glass`&&v!==`lean-to`,base:g-ge.eaveDrop,pitch:v===`lean-to`?ge.leanRise:void 0,',
             'hardGable=v===`gable`&&c!==`chapel`&&s.cover!==`glass`,p=tp({cells:m,mode:u,hardGable,'
             'jiangnan:s.cover!==`glass`&&v!==`lean-to`,base:g-ge.eaveDrop,'
@@ -77,16 +94,24 @@ def apply(root):
             'd(as(.33,.37,e),.042,(e,t,r,i)=>jiangnanTimberFront(n,fs,0,r,t-e,i-r,c))')
     replace('window forms', 'f=(e,n,i)=>{let a=t.feature({type:`window`,structure:r.id,cell:e,dir:n,variant:i}),o=i===`shopfront`?',
             'f=(e,n,variant)=>{if(i!==`chapel`&&variant===`round`)return;'
-            'if(i!==`chapel`&&i!==`barn`&&n!==d?.dir&&gableEnds.get(e&4095)?.has(n))return;'
-            'const form=i!==`chapel`&&i!==`barn`&&[`bay`,`arched`,`pointed`,`shuttered`].includes(variant)?`tall`:variant;'
+            'const [dx,dz]=j[n],river=canal&&Ro(facts,w(e)+dx,(e>>6&63)+dz);'
+            'if(!river&&i!==`chapel`&&i!==`barn`&&n!==d?.dir&&gableEnds.get(e&4095)?.has(n))return;'
+            'const form=river?`river-lattice`:i!==`chapel`&&i!==`barn`&&[`bay`,`arched`,`pointed`,`shuttered`].includes(variant)?`tall`:variant;'
             'let a=t.feature({type:`window`,structure:r.id,cell:e,dir:n,variant:form}),o=form===`shopfront`?')
     replace('identify blank gable ends', 'dir:n})},p=pk(n.facts),h=new Set;',
-            'dir:n})},p=pk(n.facts),h=new Set,gableEnds=new Map;'
+            'dir:n})},p=pk(n.facts),h=new Set,gableEnds=new Map,facts=n.facts,canal=jiangnanIsWaterTown(facts.world);'
             'for(const region of Hf(n.facts).byStructure.get(r.id)??[]){'
             'const roof=YA(n.plan,region);if(!roof||![`gable`,`stepped-gable`].includes(roof.variant))continue;'
             'const cells=new Set(region.cells),ends=roof.params?.ridge===`x`?[1,3]:[0,2];'
             'for(const cell of cells){const dirs=ends.filter(dir=>!cells.has(M(cell,dir)));'
             'if(dirs.length)gableEnds.set(cell&4095,new Set(dirs))}}')
+    replace('river lattice facade', 'l=[0,t,r]};if(a===`tall`){let e=.2+o;',
+            'l=[0,t,r]};if(a===`river-lattice`){'
+            'us(n,as(.76,.43,.16),0,Xb);jiangnanRiverFront(n,z.planks,z.shingles);'
+            'if(e.cell>>12===1&&t.rand(`river-lantern`)<.25){'
+            'n.with({color:`#5d4437`,ink:`lantern-chain`},()=>n.box([.296,.54,.146],[.304,.618,.154]));'
+            'n.at(F(.3,.355,.15),()=>Yv(n,.15))}l=[0,.16,.071]'
+            '}else if(a===`tall`){let e=.2+o;')
     replace('shop lattice', 'fs(n,.13,.16,.13,.47,.022,.052),n.with({color:r.accent,ink:`board`}',
             'jiangnanTimberFront(n,fs,.13,.16,.46,.31,.056),n.with({color:r.accent,ink:`board`}')
     replace('full shop window panels', 'd(as(.74,.39,e+.13),.04,(e,t,r,i)=>{fs(n,e+(t-e)/3,r,e+(t-e)/3,i,.022,c),fs(n,e+(t-e)*2/3,r,e+(t-e)*2/3,i,.022,c)})',
@@ -111,6 +136,9 @@ def apply(root):
             'if(a===`pipe`)')
     replace('short roof vents along the canal', 'c=!s&&o>=1&&o<=2&&n.rand(`flue`,e)<.6&&v++===0,',
             'c=!s&&!jiangnanIsWaterTown(n.facts.world)&&o>=1&&o<=2&&n.rand(`flue`,e)<.6&&v++===0,')
+    replace('occasional roof vents along the canal', 'if(d===l&&l>0&&u<1&&n.rand(`any`)>=u&&(d=0),d===0)return;',
+            'if(jiangnanIsWaterTown(n.facts.world))d=n.rand(`any`)<.45?1:0;'
+            'else if(d===l&&l>0&&u<1&&n.rand(`any`)>=u)d=0;if(d===0)return;')
     replace('omit canal maypole', 'for(let e of m)if(o.put({type:`maypole`',
             'if(!jiangnanIsWaterTown(e.world))for(let e of m)if(o.put({type:`maypole`')
 
@@ -138,12 +166,14 @@ def apply(root):
 
     for module in ('buildings', 'people'):
         shutil.copyfile(Path(__file__).with_name(f'{module}.mjs'), assets / f'jiangnan-{module}.mjs')
-    bundle.write_text('import {waterTownRules as jiangnanWaterRules,isWaterTown as jiangnanIsWaterTown} from "./water-town.mjs";\n'
+    bundle.write_text('import {waterTownRules as jiangnanWaterRules,waterTownShapeRules as jiangnanWaterShapeRules,'
+                      'isWaterTown as jiangnanIsWaterTown} from "./water-town.mjs";\n'
                       'import {roofLift as jiangnanRoofLift,roofNormal as jiangnanRoofNormal,'
                       'tileEnds as jiangnanTileEnds,lattice as jiangnanLattice,entryFrame as jiangnanEntry,'
                       'dwellingRules as jiangnanDwellingRules,hardGable as jiangnanHardGable,'
                       'tiledAwning as jiangnanTiledAwning,tiledStall as jiangnanTiledStall,'
-                      'timberShopFront as jiangnanTimberFront,'
+                      'timberShopFront as jiangnanTimberFront,riverFront as jiangnanRiverFront,'
+                      'stoneLanding as jiangnanStoneLanding,'
                       'pavilionHeight as jiangnanPavilionHeight,towerEaves as jiangnanTowerEaves,'
                       'stoveVent as jiangnanStoveVent} '
                       'from "./jiangnan-buildings.mjs";\n'

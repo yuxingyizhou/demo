@@ -5,9 +5,16 @@ const size = 48;
 const cell = (x, y, z) => x + 64 * z + 4096 * y;
 const crossings = [13, 22, 32];
 const landings = [[15, 0], [17, 1], [27, 0], [30, 1]];
-const neighborhoods = [
-  [9, 10, 0], [11, 12, 3], [15, 16, 5], [17, 18, 1], [19, 20, 2],
-  [24, 25, 5], [26, 27, 0], [28, 29, 4], [34, 35, 2], [36, 37, 7],
+// x at the river end, first and last z, depth, storeys, colour, style
+const westRows = [
+  [19, 9, 12, 2, 2, 0, 1], [19, 14, 16, 2, 1, 5, 3], [20, 17, 20, 3, 2, 2, 4],
+  [20, 23, 24, 2, 2, 1, 3], [21, 25, 28, 2, 2, 0, 1], [21, 29, 31, 2, 1, 3, 5],
+  [22, 33, 35, 3, 2, 5, 4], [22, 36, 38, 2, 1, 2, 1],
+];
+const eastRows = [
+  [25, 9, 11, 2, 1, 1, 5], [26, 12, 12, 2, 2, 0, 4], [25, 14, 16, 2, 2, 5, 3],
+  [27, 18, 20, 2, 2, 0, 1], [27, 23, 24, 2, 2, 5, 4], [28, 25, 28, 2, 1, 1, 5],
+  [27, 29, 29, 2, 2, 2, 3], [28, 33, 36, 2, 2, 0, 4], [29, 37, 38, 2, 1, 3, 5],
 ];
 
 function banks(z) {
@@ -16,6 +23,7 @@ function banks(z) {
 }
 
 const offshoreRules = new Set(['L19.sailboats', 'L38.galleon', 'L39.cog', 'L42.passing-sails']);
+const canalShapeRules = new Set(['R-H05.boathouse', 'R-H16.watermill', 'U11-F.hall-front']);
 const terrainSignature = [[5, 20, 0], [8, 20, 1], [24, 25, 0], [35, 11, 1]];
 
 export function isWaterTown(world) {
@@ -26,6 +34,10 @@ export function isWaterTown(world) {
 
 export function waterTownRules(world, rules) {
   return isWaterTown(world) ? rules.filter(rule => !offshoreRules.has(rule.id)) : rules;
+}
+
+export function waterTownShapeRules(world, rules) {
+  return isWaterTown(world) ? rules.filter(rule => !canalShapeRules.has(rule.id)) : rules;
 }
 
 function makeTerrain(seed, api) {
@@ -61,6 +73,7 @@ export function waterTown(spec, api) {
   }
   function floor(x, z, kind = 'path', y = 1) {
     const at = cell(x, y, z);
+    if (world.blocks.has(at)) return;
     if (world.floors.get(at) === kind) return;
     if (world.floors.has(at)) apply({type: 'eraseFloor', cell: at});
     apply({type: 'placeFloor', cell: at, floor: kind});
@@ -69,59 +82,49 @@ export function waterTown(spec, api) {
     apply({type: 'placeBlock', cell: cell(x, y, z), kind, color, style});
   }
 
-  for (let z = 8; z <= 38; z++) {
-    const [west, east] = banks(z);
-    for (const x of [west - 1, west, east, east + 1]) floor(x, z);
-    const opening = crossings.some(crossing => Math.abs(z - crossing) <= 1) ||
-      landings.some(([landing]) => landing === z);
-    if (!opening) {
-      apply({type: 'placeEdge', edge: cell(west, 1, z) * 2, kind: 'wall'});
-      apply({type: 'placeEdge', edge: cell(east - 1, 1, z) * 2, kind: 'wall'});
-    }
-  }
-
   for (const z of crossings) {
     const [west, east] = banks(z);
     for (let x = west + 1; x < east; x++) block(x, 0, z, 'arch', 3);
-    for (let x = west - 4; x <= east + 4; x++) floor(x, z);
+    for (let x = west - 7; x <= east + 7; x++) floor(x, z);
   }
 
-  for (const [from, to, color] of neighborhoods) {
-    for (const [side, offset] of [[0, -1], [1, 1]]) {
-      const frontage = banks(from)[side] + offset * 2;
-      const style = offset < 0 ? 1 + color % 3 : 3 + color % 3;
-      for (let z = from; z <= to; z++) {
-        block(frontage, 1, z, 'house', color, style);
-        block(frontage + offset, 1, z, 'house', color, style);
-        if (color !== 4 && (color !== 7 || side === 0)) {
-          block(frontage, 2, z, 'house', color, style);
-          block(frontage + offset, 2, z, 'house', color, style);
+  function houses(rows, direction) {
+    for (const [x, from, to, depth, storeys, color, style] of rows) {
+      for (let y = 1; y <= storeys; y++) {
+        for (let z = from; z <= to; z++) {
+          for (let offset = 0; offset < depth; offset++) block(x + direction * offset, y, z, 'house', color, style);
         }
       }
     }
   }
+  houses(westRows, -1);
+  houses(eastRows, 1);
+  houses([[15, 10, 12, 1, 1, 0, 5], [14, 14, 16, 2, 2, 2, 3], [15, 18, 20, 2, 1, 5, 1],
+    [14, 28, 30, 2, 1, 2, 5], [16, 34, 37, 2, 2, 5, 1]], -1);
+  houses([[31, 9, 11, 2, 2, 5, 4], [31, 15, 16, 2, 1, 0, 3], [32, 23, 26, 2, 2, 3, 1],
+    [31, 28, 31, 2, 1, 1, 4], [33, 34, 38, 2, 1, 5, 3]], 1);
 
-  for (const [z, side, end] of [[14, 1, 35], [21, 0, 13], [30, 0, 13], [33, 1, 35]]) {
+  for (let z = 8; z <= 38; z++) {
+    const [west, east] = banks(z);
+    for (const x of [west, west - 4, east + 2]) floor(x, z);
+    if (z !== 8 && banks(z - 1)[1] !== east) floor(banks(z - 1)[1] + 2, z);
+  }
+  for (const [z, side, end] of [[14, 1, 31], [21, 0, 14], [27, 1, 33], [30, 0, 16], [33, 1, 34]]) {
     const start = banks(z)[side];
     for (let x = Math.min(start, end); x <= Math.max(start, end); x++) floor(x, z);
-  }
-  for (const [x, z, color, style] of [[34, 15, 3, 2], [12, 19, 5, 5], [13, 31, 1, 1], [35, 35, 2, 3]]) {
-    for (const dy of [1, 2]) {
-      for (const dx of [0, 1]) for (const dz of [0, 1]) block(x + dx, dy, z + dz, 'house', color, style);
-    }
   }
 
   for (const [z, side] of landings) {
     const bank = banks(z)[side];
+    floor(bank, z);
     block(bank + (side === 0 ? 1 : -1), 0, z, 'dock');
   }
-  for (const z of [8, 14, 23, 30, 38]) {
-    const [west, east] = banks(z);
-    block(west, 1, z, 'tree');
-    block(east, 1, z, 'tree');
+  for (const [z, side, inset] of [[8, 0, -1], [8, 1, 0], [12, 1, 0], [21, 1, 0],
+    [31, 1, 0], [37, 0, 0], [37, 1, 0], [38, 1, 0]]) {
+    block(banks(z)[side] + inset, 1, z, 'tree');
   }
   for (const [x, z] of [[11, 11], [11, 18], [12, 23], [10, 25], [13, 27], [12, 29],
-    [12, 33], [15, 36], [36, 10], [38, 13], [37, 17], [36, 20], [35, 23], [39, 24],
+    [12, 33], [13, 36], [36, 10], [38, 13], [37, 17], [36, 20], [35, 23], [39, 24],
     [38, 29], [37, 35]]) block(x, 1, z, 'tree');
 
   const [gardenBank] = banks(23);
@@ -134,8 +137,8 @@ export function waterTown(spec, api) {
   }
   for (let x = gardenBank - 7; x <= gardenBank - 4; x++) floor(x, 22);
   const east = banks(22)[1];
-  for (let z = 21; z <= 23; z++) for (let x = east + 2; x <= east + 5; x++) floor(x, z, 'plaza');
-  for (const z of [21, 23]) block(east + 5, 1, z, 'stall');
+  for (let z = 20; z <= 22; z++) for (let x = east + 2; x <= east + 5; x++) floor(x, z, 'plaza');
+  for (const z of [20, 21]) block(east + 5, 1, z, 'stall');
 
   for (const [minX, maxX, minZ, maxZ] of [[11, 15, 12, 17], [34, 37, 28, 34]]) {
     for (let z = minZ; z <= maxZ; z++) for (let x = minX; x <= maxX; x++) floor(x, z, 'garden');
@@ -145,7 +148,7 @@ export function waterTown(spec, api) {
   for (const {role} of api.resolve(world, terrain).roles.values()) roles[role] = (roles[role] ?? 0) + 1;
   if (roles['stone-bridge'] !== crossings.length || !roles.bandstand) throw new Error('水乡石桥或凉亭没有形成');
   return {seed: spec.seed, name: spec.name, world, terrain, initialWorld,
-    camera: {target: [24, 1, 23], yaw: 36, pitch: 34, zoom: 2.8},
+    camera: {target: [24, 1, 23], yaw: 322, pitch: 29, zoom: 2.65},
     plan: {character: 'river', edits, unjoined: [], refused: 0, fellBack: false},
     audit: {removed: 0, skipped: [], roles, blocks: world.blocks.size, floors: world.floors.size,
       edges: world.edges.size, bridges: crossings, terrainColumns: initialWorld.terrainEdits.size}};

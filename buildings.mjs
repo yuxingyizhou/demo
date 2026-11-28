@@ -174,6 +174,45 @@ export function timberShopFront(mesh, bars, center, low, width, height, depth) {
   });
 }
 
+export function riverFront(mesh, planks, shingles) {
+  mesh.with({color: '#352b26', ink: 'recessed-wood-screen'}, () =>
+    mesh.quad([-.374, .163, .055], [.374, .163, .055], [.374, .59, .055], [-.374, .59, .055]));
+  mesh.with({color: timber, pattern: planks, ink: 'waterfront-joinery'}, () => {
+    mesh.box([-.405, .095, .01], [.405, .155, .102]);
+    mesh.box([-.405, .59, .01], [.405, .645, .086]);
+    for (const x of [-.4, 0, .4]) mesh.box([x - .019, .145, .045], [x + .019, .597, .085]);
+  });
+  mesh.with({color: '#80604a', ink: 'window-muntins'}, () => {
+    for (const x of [-.305, -.213, -.118, .118, .213, .305]) {
+      mesh.quad([x - .009, .156, .071], [x + .009, .156, .071],
+        [x + .009, .594, .071], [x - .009, .594, .071]);
+    }
+    for (const y of [.25, .5]) mesh.box([-.392, y, .055], [.392, y + .018, .075]);
+  });
+  tiledSlope(mesh, .463, [.687, -.01], [.622, .152], shingles);
+}
+
+export function stoneLanding(mesh, point, top, water, pattern) {
+  const landing = water + .04;
+  function slab(left, right, front, back, base, height) {
+    const [x1, z1] = point(left, front);
+    const [x2, z2] = point(right, back);
+    mesh.box([Math.min(x1, x2), base, Math.min(z1, z2)],
+      [Math.max(x1, x2), height, Math.max(z1, z2)], {skip: ['bottom']});
+  }
+  mesh.with({pattern, ink: 'stone-landing'}, () => {
+    for (let step = 0; step < 5; step++) {
+      const base = step === 4 ? water - .14 : top + (landing - top) * (step + 1) / 4;
+      const height = top + (landing - top) * step / 4;
+      mesh.setColor(step % 2 ? '#a8aaa0' : '#babbb0');
+      slab(.08, .92, step * .18, (step + 1) * .18 + .014, Math.min(base, height) - .015, height);
+    }
+    mesh.setColor('#8e978e');
+    slab(.02, .08, -.035, .91, water - .14, top + .055);
+    slab(.92, .98, -.035, .91, water - .14, top + .055);
+  });
+}
+
 export function pavilionHeight(base, pitch, distance, point, outline) {
   const curve = .025 * Math.exp(-Math.max(0, distance) * 6);
   if (!point || !outline.length) return base + distance * pitch + curve;
