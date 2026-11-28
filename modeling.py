@@ -18,27 +18,36 @@ def apply(root):
     replace('dwelling features', 'floorAt:o,edgeAt:s,supports:c},n.rules??HU(),n)',
             'floorAt:o,edgeAt:s,supports:c},jiangnanWaterShapeRules(e,jiangnanDwellingRules(n.rules??HU())),n)')
     replace('canal traffic', 'function GW(e,t={}){return HW(e,FU(e,t.rules??HU(),{buildNav:rO},t))}',
-            'function GW(e,t={}){return HW(e,FU(e,jiangnanWaterRules(e.world,'
-            'jiangnanDwellingRules(t.rules??HU())),{buildNav:rO},t))}')
+            '''function GW(e,t={}){const rules=jiangnanWaterRules(e.world,jiangnanDwellingRules(t.rules??HU()));
+            return HW(e,FU(e,jiangnanIsLanternTown(e.world)?[...rules,jiangnanFestivalActivities]:rules,{buildNav:rO},t))}
+            const jiangnanFestivalActivities=q({id:`L99.lantern-market`,part:`life`,tier:3,priority:723,townWide:true,
+              find:({plan})=>jiangnanLanternActivities(plan),
+              apply(candidate, stage){const params={...candidate.data,y:h};
+                stage.actor({type:`festival-market`,variant:params.kind,at:{cell:candidate.anchor,pos:`c`},params});
+              }});''')
     replace('canal moorings', '!n[p(c+a,l+o)]&&!r(c+a,l+o)||[.7,1.1,1.5].some',
             '!jiangnanIsWaterTown(e.world)&&!n[p(c+a,l+o)]&&!r(c+a,l+o)||[.7,1.1,1.5].some')
     replace('tag canal boats', 'line:hr.line,rank:e.data.rank,',
             'line:hr.line,rank:e.data.rank,canal:jiangnanIsWaterTown(n.facts.world),festival:jiangnanIsLanternTown(n.facts.world),')
     replace('canal boat proportions', 'function es(){return{length:hr.rowLength,beam:hr.rowBeam,',
-            'function es(canal=false){return{length:hr.rowLength*(canal?1.4:1),beam:hr.rowBeam*(canal?1.42:1),')
+            'function es(canal=false,flower=false){return{length:hr.rowLength*(flower?1.92:canal?1.4:1),beam:hr.rowBeam*(flower?2.10:canal?1.42:1),')
     replace('canal boat hull', 'actor:`rowboat`,build(e,t){let n=t.mesh(),r=Qo(e.params?.look),a=jt(n,es(),r);',
             'actor:`rowboat`,build(e,t){let n=t.mesh(),r=Qo(e.params?.look),a=jt(n,es(e.params?.canal),r);')
     replace('festival lights on boats', 'n.with({ink:`oars`},()=>{let e=a.sheer(.5)-.014;',
             'e.params?.festival&&n.at(F(0,0,a.z(.20,.16)),()=>jiangnanBoatLantern(n,z.glow)),'
             'n.with({ink:`oars`},()=>{let e=a.sheer(.5)-.014;')
     replace('festive lamps travel with the rower', 'actor:`rower`,build(e,t){let n=t.mesh(),r=Qo(e.params?.look??0),a=jt(n,es(),r);',
-            'actor:`rower`,build(e,t){let n=t.mesh(),r=Qo(e.params?.look??0),a=jt(n,es(e.params?.canal),r);'
-            'if(e.params?.festival){n.at(F(0,0,a.z(.17,.18)),()=>jiangnanBoatLantern(n,z.glow,true));'
-            'n.at(F(0,-.02,a.z(.81,.18)),()=>jiangnanBoatLantern(n,z.glow,true))}')
+            'actor:`rower`,build(e,t){let n=t.mesh(),r=Qo(e.params?.look??0),festival=e.params?.festival;'
+            'if(festival)r={...r,topsides:`#b38357`,rail:`#a55638`,strake:`#d5ae6d`};'
+            'let a=jt(n,es(e.params?.canal,festival),r);'
+            'if(festival){jiangnanFlowerBoat(n,jiangnanFestivalMaterials());'
+            'n.at(F(0,0,a.z(.17,.18)),()=>jiangnanBoatLantern(n,z.glow,true));'
+            'n.at(F(0,-.02,a.z(.81,.18)),()=>jiangnanBoatLantern(n,z.glow))}')
     replace('festival boat procession route', 'joined by open water (at most two in the town).`,find({facts:e}){let t=[],n=fr(e),',
             'joined by open water (at most two in the town).`,find({facts:e}){'
             'if(jiangnanIsLanternTown(e.world)){'
-            'const from=S(23,0,27),to=S(26,0,30),a=e.structureAt.get(from),b=e.structureAt.get(to);'
+            'const from=S(23,0,27),landing=S(jiangnanLanternLanding.x-1,0,jiangnanLanternLanding.z);'
+            'const to=e.kinds.get(landing)===`dock`?landing:S(26,0,30),a=e.structureAt.get(from),b=e.structureAt.get(to);'
             'const [ax,az,bx,bz]=[25.5,24.2,25.5,30.2];'
             'return a!==void 0&&b!==void 0&&e.kinds.get(from)===`dock`&&e.kinds.get(to)===`dock`&&'
             'Ko(Uo(e),[ax,az],[bx,bz])?[{anchor:from,structure:a,key:`festival`,data:{a,b,ax,az,bx,bz}}]:[]}'
@@ -48,8 +57,34 @@ def apply(root):
             'canal:jiangnanIsLanternTown(n.facts.world),ax:r.ax,')
     replace('hang festival lamps on the market stalls',
             '()=>uh(r,{role:a,goods:Zd(o)??qd(t.world.seed,n),front:Qd(o)??2,seed:e.seed,color:e.color}));',
-            '()=>{uh(r,{role:a,goods:Zd(o)??qd(t.world.seed,n),front:Qd(o)??2,seed:e.seed,color:e.color});'
-            'if(jiangnanIsLanternTown(t.world))jiangnanMarketLanterns(r,z.glow)});')
+            '()=>{if(jiangnanIsLanternTown(t.world)){r.rotateY(Math.PI);'
+            'jiangnanFestivalStall(r,jiangnanFestivalMaterials(),Jr,w(n)===30||w(n)===35)}'
+            'else uh(r,{role:a,goods:Zd(o)??qd(t.world.seed,n),front:Qd(o)??2,seed:e.seed,color:e.color})});')
+    replace('register festival market meshes', '"/src/parts/actors/boats/rower.part.ts":P_,',
+            '"/src/parts/actors/boats/rower.part.ts":P_,"/src/parts/actors/jiangnan/market.part.ts":jiangnanFestivalActorModule,')
+    replace('festival actor model recipes', 'var $o=P({default:()=>ns,rowboatBow:()=>ts,rowboatSpec:()=>es});',
+            '''const jiangnanFestivalActorModule=P({default:()=>jiangnanMarketActor});
+            const jiangnanMarketActor=Y({actor:`festival-market`,build(item,ctx){
+              const mesh=ctx.mesh(),p=item.params,materials=jiangnanFestivalMaterials();
+              if(item.variant===`turning`)jiangnanTurningLamp(mesh,materials);
+              else if(item.variant===`wash`)jiangnanFestivalWash(mesh,p.walk,z.beam);
+              else if(item.variant===`riddles`)jiangnanRiddleStand(mesh,materials);
+              else {
+                const child=item.variant===`child`, seller=item.variant===`seller`;
+                const palette=[`#b96548`,`#c89d59`,`#8e5355`,`#557e72`,`#d29d70`];
+                const person={...Vi(229+p.index*109,child),top:palette[p.index%palette.length],
+                  ...(seller?{jiangnan:`apron`}:{})};
+                const pose=ra(child?`carry`:seller||item.variant===`guest`?`carry`:item.variant===`riddle`?`read`:`look`,.24);
+                const rig=aa(person,pose);
+                mesh.at(ot(child?1.16:1.22),()=>{
+                  $i(Zi(person,mesh.inkOf(`festival-visitor`)),[0,1,2,3,4].map(i=>rig.subarray(i*16,(i+1)*16)),mesh);
+                  if(child){mesh.translate(.111,.133,.158);jiangnanRabbitLamp(mesh,materials,Jr)}
+                  if(seller||item.variant===`guest`){mesh.translate(.071,0,.149);jiangnanFestivalBowl(mesh,.197,.069,z.stone)}
+                });
+              }
+              return {mesh:mesh.build(),animated:true};
+            }});
+            var $o=P({default:()=>ns,rowboatBow:()=>ts,rowboatSpec:()=>es});''')
     replace('festival bridge gallery', 'ee=e=>l(w(e),f(e))?t.terrain.height[p(w(e),f(e))]:0;for(let e of o.values())',
             'ee=e=>l(w(e),f(e))?t.terrain.height[p(w(e),f(e))]:0;'
             'const bridge=jiangnanLandmarks.bridge;'
@@ -213,8 +248,12 @@ def apply(root):
         shutil.copyfile(Path(__file__).with_name(f'{module}.mjs'), assets / f'jiangnan-{module}.mjs')
     bundle.write_text('import {waterTownRules as jiangnanWaterRules,waterTownShapeRules as jiangnanWaterShapeRules,'
                       'isWaterTown as jiangnanIsWaterTown,isLanternTown as jiangnanIsLanternTown,'
-                      'lanternLandmarks as jiangnanLandmarks} from "./water-town.mjs";\n'
-                      'import {boatLantern as jiangnanBoatLantern,marketLanterns as jiangnanMarketLanterns,'
+                      'lanternLandmarks as jiangnanLandmarks,lanternLanding as jiangnanLanternLanding,'
+                      'lanternActivities as jiangnanLanternActivities} from "./water-town.mjs";\n'
+                      'import {boatLantern as jiangnanBoatLantern,festivalStall as jiangnanFestivalStall,'
+                      'rabbitLantern as jiangnanRabbitLamp,flowerBoat as jiangnanFlowerBoat,'
+                      'turningLamp as jiangnanTurningLamp,festivalWash as jiangnanFestivalWash,'
+                      'festivalBowl as jiangnanFestivalBowl,riddleStand as jiangnanRiddleStand,'
                       'coveredBridge as jiangnanCoveredBridge,'
                       'gatePost as jiangnanGatePost,gateRoof as jiangnanGateRoof,pagoda as jiangnanPagoda} from "./jiangnan-festival.mjs";\n'
                       'const jiangnanFestivalMaterials=()=>({tiles:z.shingles,wood:z.planks,stone:z.stone,glow:z.glow});\n'
@@ -232,6 +271,35 @@ def apply(root):
 
     pointer, = assets.glob('pointer-*.js')
     source = pointer.read_text(encoding='utf-8')
+    replace('register movement for the lantern market actors', '"/src/life/boats/rower.behaviour.ts":bl,',
+            '"/src/life/boats/rower.behaviour.ts":bl,"/src/life/jiangnan/market.behaviour.ts":jiangnanMarketBehaviourModule,')
+    replace('animate market visitors and the rotating lantern', 'function ns(e){',
+            '''const jiangnanMarketBehaviourModule=ot({default:()=>jiangnanMarketBehaviour});
+            const jiangnanMarketBehaviour=ns({actor:`festival-market`,
+              create(item,ctx){if(item.variant===`wash`)ctx.instance.setParams(.72,0,0,-2);
+                return {elapsed:0, matrix:Array(16)};
+              },
+              update(state,dt,signals,ctx){
+                const {kind,x,y,z,walk,index}=ctx.item.params;
+                state.elapsed+=dt;
+                let along=x,height=y, yaw=0,lean=0;
+                if(kind===`wash`)ctx.instance.setParams(.72,0,0,-2);
+                if(kind===`turning`)yaw=state.elapsed*.43;
+                if(kind===`child`||kind===`stroll`){
+                  const phase=state.elapsed*.78+index*.28;
+                  along+=walk*(.5-.5*Math.cos(phase));
+                  yaw=Math.sin(phase)>0?Math.PI/2:-Math.PI/2;
+                  if(z>22&&z<23&&along>22&&along<27)height+=.25*Math.sin(Math.PI*(along-22)/5);
+                  height+=.016*Math.abs(Math.sin(state.elapsed*13+index));
+                }
+                if(kind===`watch`)yaw=-1.3;
+                if(kind===`riddle`)yaw=2.8+.15*Math.sin(state.elapsed+index);
+                if(kind===`riddles`)yaw=Math.PI;
+                if(kind===`seller`){yaw=1.12;lean=.15*Math.sin(state.elapsed*2.1)}
+                if(kind===`guest`){yaw=3.4+.15*Math.sin(state.elapsed+index);lean=.035*Math.sin(state.elapsed*2)}
+                ctx.instance.setMatrix(Oi(along,height,z,yaw,lean,0,1,state.matrix));
+              }});
+            function ns(e){''')
     replace('bargeman clothing', 'dress:!1,hat:`straw`,hatColor:G.yellow,top:gr.roof[3]',
             'jiangnan:`reed-hat`,dress:!1,hat:`straw`,hatColor:G.yellow,top:gr.roof[3]')
     replace('sailor clothing', 'a={...i,dress:!1,top:r%2==0?G.white:gr.roof[1]',
@@ -249,6 +317,17 @@ def apply(root):
             'e.waitLeft=festival?2.5:Cl+i.rand(`wait`,e.waits++)*wl)')
     replace('festival boat procession pace', 'e.leg+xl*(.45+1.1*n)*t*e.slow)',
             'e.leg+(festival?xl*1.35:xl)*(.45+1.1*n)*t*e.slow)')
+    replace('festival percussion schedule', 'lastNote:-1,windAt:0,peal:null,off:[]',
+            'lastNote:-1,windAt:0,peal:null,marketDrums:3.2,off:[]')
+    replace('a short procession of market percussion', 'if(e.windAt-=t,e.windAt<=0)',
+            '''if(e.shape&&jiangnanFestivalSound(e.shape.world)&&!a.isDay&&(e.marketDrums-=t)<=0){
+              e.marketDrums=19;
+              const when=i.ac.currentTime;
+              for(const [delay,pitch,volume] of [[0,94,.041],[.27,132,.023],[.43,101,.031],[.79,90,.036]])
+                Xg(i.ac,i.master,pitch,`plank`,volume,when+delay);
+              Xg(i.ac,i.master,286,`bell`,.014,when+.83);
+            }
+            if(e.windAt-=t,e.windAt<=0)''')
     replace('moving festival light on water', '    } else if (pat == 11) {\n      // water on a side face',
             '''    } else if (pat == 41) {
       float ripple = sin(vW.z * 9.0 + vW.x * 11.0 - uTime * 3.2) * 0.5 + 0.5;
@@ -259,4 +338,10 @@ def apply(root):
       glow = light;
     } else if (pat == 11) {
       // water on a side face''')
-    pointer.write_text(source, encoding='utf-8')
+    replace('warm light reaches the festival stone paving', '  } else if (vParams.w < -0.5) {',
+            '''  } else if (vParams.w < -1.5) {
+    float a = pow(clamp(1.0 - vEdge, 0.0, 1.0), 2.35) * max(vParams.x, 0.0) * (0.12 + 0.34 * uGlow);
+    oColor = vec4(toSrgb(base) * a * 1.24, a * 0.54);
+  } else if (vParams.w < -0.5) {''')
+    pointer.write_text('import {isLanternTown as jiangnanFestivalSound} from "./water-town.mjs";\n' + source,
+                       encoding='utf-8')

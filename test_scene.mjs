@@ -69,6 +69,18 @@ for (const preset of PRESETS) {
     assert.equal(audit.roles.jetty, 4);
     assert.equal(dressing.actors.filter(actor => actor.type === 'rowboat' && actor.params.festival).length, 4);
     assert.equal(dressing.actors.filter(actor => actor.type === 'rower' && actor.params.festival).length, 1);
+    const activities = dressing.actors.filter(actor => actor.type === 'festival-market');
+    for (const kind of ['turning', 'wash', 'riddles', 'seller', 'guest', 'watch']) {
+      assert(activities.some(actor => actor.variant === kind), kind);
+    }
+    assert(activities.filter(actor => actor.variant === 'child' && actor.params.walk > 1).length >= 3);
+    assert(!dressing.props.some(prop => ['bunting', 'cafe-table', 'flag'].includes(prop.type)));
+    const earlierBlocks = new Map(world.blocks);
+    const newDock = save.U(27, 0, 26);
+    earlierBlocks.set(save.U(26, 0, 30), earlierBlocks.get(newDock));
+    earlierBlocks.delete(newDock);
+    const earlierDressing = engine.tt(api.resolve({...world, blocks: earlierBlocks}, terrain));
+    assert(earlierDressing.actors.some(actor => actor.type === 'rower' && actor.params.festival));
     assert(!dressing.actors.some(actor => actor.type === 'sailboat' ||
       actor.type === 'ship-call' && actor.variant !== 'barge'));
     const builder = engine.ht();

@@ -4,8 +4,8 @@ const stone = '#aca79c';
 const tile = '#37474a';
 const ripplePattern = 41;
 
-export function festivalLantern(mesh, y, radius, glow) {
-  mesh.with({color: '#eb6036', pattern: glow, ink: 'festival-lantern'}, () => {
+export function festivalLantern(mesh, y, radius, glow, color = '#f3a24f') {
+  mesh.with({color, pattern: glow, ink: 'festival-lantern'}, () => {
     mesh.lathe([[radius * .55, y], [radius, y + radius * .6], [radius, y + radius * 1.35],
       [radius * .55, y + radius * 1.9]], {segments: 10, capTop: true, capBottom: true});
   });
@@ -45,12 +45,149 @@ export function boatLantern(mesh, glow, big = false) {
 }
 
 export function marketLanterns(mesh, glow) {
-  for (const x of [-.26, .26]) {
+  for (const x of [-.32, .32]) {
     for (const z of [-.285, .285]) {
       mesh.translate(x, 0, z);
-      festivalLantern(mesh, .365, .095, glow);
+      festivalLantern(mesh, .386, .089, glow, z > 0 ? '#f3ad61' : '#ed7357');
       mesh.translate(-x, 0, -z);
     }
+  }
+}
+
+export function rabbitLantern(mesh, materials, ball) {
+  mesh.with({color: '#fff0c7', pattern: materials.glow, ink: 'paper-rabbit'}, () => {
+    ball(mesh, 0, .067, -.015, .070, .056, .092, 9, 5);
+    ball(mesh, 0, .10, .061, .049, .05, .05, 8, 4);
+    for (const x of [-.022, .022]) ball(mesh, x, .162, .057, .014, .047, .018, 7, 4);
+    ball(mesh, 0, .074, -.104, .029, .030, .029, 7, 4);
+  });
+  mesh.with({color: '#b44632', ink: 'rabbit-eyes-and-ribbons'}, () => {
+    mesh.box([-.039, .1, .066], [-.032, .108, .085]);
+    mesh.box([.032, .1, .066], [.039, .108, .085]);
+    mesh.box([-.06, .013, -.092], [.06, .028, .092]);
+  });
+}
+
+export function festivalBowl(mesh, height, radius, material) {
+  mesh.with({color: '#d9d8bc', pattern: material, ink: 'ceramic-bowl'}, () => {
+    mesh.lathe([[radius * .55, height], [radius, height + .058], [radius * .91, height + .059],
+      [radius * .57, height + .014], [0, height + .01]], {segments: 10, capBottom: true});
+  });
+}
+
+export function marketGoods(mesh, materials, ball, food) {
+  mesh.with({color: '#925438', pattern: materials.wood, ink: 'market-counter'}, () => {
+    mesh.box([-.33, .19, .03], [.33, .238, .43]);
+    mesh.box([-.30, .018, .09], [ .30, .19, .4]);
+  });
+  if (food) {
+    mesh.with({color: '#4e4b3d', ink: 'iron-pot'}, () => {
+      mesh.lathe([[.089, .24], [.137, .27], [.15, .405], [.153, .419], [.14, .43],
+        [.134, .413], [.125, .31]], {segments: 12, capBottom: true});
+    });
+    mesh.with({color: '#f4d8a5', ink: 'broth-and-tangyuan'}, () => {
+      mesh.lathe([[.132, .399], [0, .399]], {segments: 12});
+      for (const [x, z] of [[-.063, -.039], [.038, .04], [.058, -.042], [-.022, .061]]) {
+        ball(mesh, x, .401, z, .036, .022, .033, 7, 4);
+      }
+    });
+    for (const x of [-.23, .23]) {
+      mesh.translate(x, 0, .28);
+      festivalBowl(mesh, .24, .074, materials.stone);
+      mesh.translate(-x, 0, -.28);
+    }
+  } else {
+    mesh.translate(-.17, .249, .25);
+    rabbitLantern(mesh, materials, ball);
+    mesh.translate(.34, 0, .02);
+    festivalLantern(mesh, .018, .085, materials.glow, '#ed7852');
+    mesh.translate(-.17, -.249, -.27);
+  }
+}
+
+export function festivalStall(mesh, materials, ball, food) {
+  mesh.with({color: timber, pattern: materials.wood, ink: 'stall-posts'}, () => {
+    for (const x of [-.425, .425]) {
+      for (const z of [-.27, .33]) mesh.box([x - .025, 0, z - .025], [x + .025, .69, z + .025]);
+    }
+    for (const z of [-.29, .32]) mesh.box([-.46, .61, z - .024], [.46, .672, z + .024]);
+  });
+  ridgeRoof(mesh, .54, .42, .68, .19, materials.tiles);
+  marketGoods(mesh, materials, ball, food);
+  marketLanterns(mesh, materials.glow);
+}
+
+export function riddleStand(mesh, materials) {
+  mesh.with({color: timber, pattern: materials.wood, ink: 'riddle-frame'}, () => {
+    for (const x of [-.33, .33]) mesh.box([x - .025, 0, -.027], [x + .025, .67, .027]);
+    mesh.box([-.39, .63, -.035], [.39, .69, .035]);
+  });
+  for (const x of [-.21, 0, .21]) {
+    mesh.translate(x, 0, 0);
+    festivalLantern(mesh, .42, .067, materials.glow, x === 0 ? '#ffdb8f' : '#ed7e57');
+    mesh.with({color: '#f0cc96', ink: 'riddle-strip'}, () => mesh.box([-.043, .228, .025], [.043, .42, .032]));
+    mesh.with({color: '#744633', ink: 'brush-strokes'}, () => {
+      for (const y of [.258, .287, .322, .35]) mesh.box([-.022, y, .032], [.021, y + .009, .037]);
+    });
+    mesh.translate(-x, 0, 0);
+  }
+}
+
+export function turningLamp(mesh, materials) {
+  mesh.with({color: '#654438', pattern: materials.wood, ink: 'lantern-plinth'}, () => {
+    mesh.lathe([[.52, -.012], [.52, .074], [.46, .13], [.35, .13]], {segments: 8});
+    mesh.lathe([[.30, .13], [.27, .25], [.30, .39], [.47, .43]], {segments: 8});
+  });
+  mesh.with({color: '#ffcf81', pattern: materials.glow, ink: 'turning-light-panels'}, () =>
+    mesh.lathe([[.43, .44], [.46, .49], [.46, 1.02], [.42, 1.07]], {segments: 8}));
+  for (let side = 0; side < 8; side++) {
+    const angle = (side + .5) * Math.PI / 4;
+    mesh.rotateY(angle);
+    mesh.with({color: '#9e4d32', ink: 'lantern-cutout'}, () => {
+      mesh.box([-.172, .45, .422], [-.15, 1.046, .445]);
+      mesh.box([-.17, .51, .425], [.17, .527, .447]);
+      mesh.box([-.17, .973, .425], [.17, .99, .447]);
+      for (const x of [-.102, .049]) {
+        mesh.tri([x - .048, .647, .433], [x, .847, .433], [x + .048, .647, .433]);
+        mesh.tri([x + .048, .647, -.433], [x, .847, -.433], [x - .048, .647, -.433]);
+      }
+    });
+    mesh.rotateY(-angle);
+  }
+  mesh.with({color: '#883d2b', pattern: materials.tiles, ink: 'lantern-eaves'}, () =>
+    mesh.lathe([[.53, 1.062], [.53, 1.11], [.39, 1.14], [.116, 1.32], [.028, 1.35]], {segments: 8}));
+  mesh.with({color: '#cea25a', ink: 'lantern-knob'}, () =>
+    mesh.lathe([[.057, 1.325], [.057, 1.39], [0, 1.45]], {segments: 8}));
+}
+
+export function festivalWash(mesh, radius, beam) {
+  mesh.setColor('#ffc783').setPattern(beam).setInk('lantern-light-on-stones');
+  const ring = index => {
+    const theta = index * Math.PI / 12;
+    return [Math.cos(theta) * radius, .027, -Math.sin(theta) * radius];
+  };
+  for (let index = 0; index < 24; index++) {
+    mesh.tri([0, .027, 0], ring(index), ring(index + 1), {edge: [0, 1, 1]});
+  }
+}
+
+export function flowerBoat(mesh, materials) {
+  mesh.with({color: '#c08c5a', pattern: materials.wood, ink: 'flower-boat-deck'}, () => {
+    mesh.box([-.213, .052, -.44], [.213, .092, .44]);
+    for (const x of [-.20, .20]) {
+      mesh.box([x - .022, .083, -.41], [x + .022, .128, .41]);
+      for (const z of [-.36, .36]) mesh.box([x - .024, .092, z - .022], [x + .024, .48, z + .022]);
+    }
+    mesh.box([-.24, .46, -.38], [.24, .49, -.33]);
+    mesh.box([-.24, .46, .33], [.24, .49, .38]);
+  });
+  mesh.rotateY(Math.PI / 2);
+  ridgeRoof(mesh, .41, .29, .49, .16, materials.tiles, .055);
+  mesh.rotateY(-Math.PI / 2);
+  for (const [x, z] of [[-.255, -.15], [.255, .13]]) {
+    mesh.translate(x, 0, z);
+    festivalLantern(mesh, .25, .084, materials.glow, '#f8cb85');
+    mesh.translate(-x, 0, -z);
   }
 }
 

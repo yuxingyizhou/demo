@@ -9,6 +9,43 @@ export const lanternLandmarks = {
   gate: {x: 34, z: 22, posts: [20, 21, 23, 24]},
   tower: {x: 13, z: 22},
 };
+export const lanternLanding = {x: 28, z: 26};
+export const lanternStalls = [[30, 21], [31, 23], [33, 20], [35, 24]];
+
+export function lanternActivities(plan) {
+  const sites = [
+    ['turning', 32, 22, .32, .25], ['wash', 32, 22, .32, .25, 1.15],
+    ['wash', 30, 22, .40, .32, 1.25], ['wash', 31, 23, .38, .31, .85],
+    ['wash', 28, 26, .35, .5, .52],
+    ['riddles', 29, 20, .44, .8], ['riddles', 31, 22, .15, .52], ['riddles', 28, 27, .27, .26],
+    ['child', 24, 22, .55, .31, 4.4], ['child', 26, 22, .1, .68, 3.5],
+    ['child', 30, 22, .49, .76, 2.6], ['child', 32, 21, .71, .79, 1.18],
+    ['child', 28, 26, .24, .82],
+    ['stroll', 28, 22, .26, .64, 2.6],
+    ['watch', 28, 26, .47, .38], ['watch', 28, 27, .28, .54],
+    ['riddle', 29, 22, .29, .08], ['riddle', 30, 20, .27, .8],
+    ['riddle', 30, 22, .23, .34], ['guest', 30, 22, .67, .7],
+    ['seller', 30, 20, .44, .93], ['guest', 31, 22, .6, .81],
+    ['guest', 31, 21, .55, .36], ['stroll', 31, 21, .46, .71, 2],
+    ['riddle', 32, 22, .77, .83], ['riddle', 33, 22, .34, .24], ['guest', 32, 23, .14, .31],
+    ['seller', 35, 23, .47, .94], ['guest', 35, 23, .86, .43],
+  ];
+  return sites.flatMap(([kind, x, z, dx, dz, extent], index) => {
+    const anchor = cell(x, 1, z);
+    if (!plan.floorAt.has(anchor) || plan.kinds.has(anchor)) return [];
+    let walk = extent ?? 0;
+    if (kind === 'stroll' || kind === 'child') {
+      for (let col = x + 1; col <= Math.floor(x + dx + walk); col++) {
+        const next = cell(col, 1, z);
+        if (!plan.floorAt.has(next) || plan.kinds.has(next)) {
+          walk = Math.max(0, col - x - dx - .12);
+          break;
+        }
+      }
+    }
+    return [{anchor, key: String(index), data: {kind, x: x + dx, z: z + dz, walk, index}}];
+  });
+}
 const crossings = [13, 22, 32];
 const landings = [[15, 0], [17, 1], [27, 0], [30, 1]];
 // x at the river end, first and last z, depth, storeys, colour, style
@@ -30,6 +67,8 @@ function banks(z) {
 
 const offshoreRules = new Set(['L19.sailboats', 'L38.galleon', 'L39.cog', 'L42.passing-sails']);
 const canalShapeRules = new Set(['R-H05.boathouse', 'R-H16.watermill', 'U11-F.hall-front']);
+const lanternDecorations = new Set(['D04.bunting', 'D08.cafe-tables', 'D13.flags', 'D13-T.tallest-flag',
+  'D27.post', 'D31.viewpoint', 'D35.festival-lights']);
 const terrainSignature = [[5, 20, 0], [8, 20, 1], [24, 25, 0], [35, 11, 1]];
 
 export function isWaterTown(world) {
@@ -45,11 +84,15 @@ export function isLanternTown(world) {
 }
 
 export function waterTownRules(world, rules) {
-  return isWaterTown(world) ? rules.filter(rule => !offshoreRules.has(rule.id)) : rules;
+  const lantern = isLanternTown(world);
+  return isWaterTown(world) ? rules.filter(rule => !offshoreRules.has(rule.id) &&
+    !(lantern && lanternDecorations.has(rule.id))) : rules;
 }
 
 export function waterTownShapeRules(world, rules) {
-  return isWaterTown(world) ? rules.filter(rule => !canalShapeRules.has(rule.id)) : rules;
+  const lantern = isLanternTown(world);
+  return isWaterTown(world) ? rules.filter(rule => !canalShapeRules.has(rule.id) &&
+    !(lantern && rule.id === 'J22.plaza-paving')) : rules;
 }
 
 function makeTerrain(seed, api) {
@@ -111,7 +154,7 @@ export function waterTown(spec, api) {
     }
   }
   houses(westRows, -1);
-  houses(eastRows, 1);
+  houses(festival ? eastRows.map(row => row[1] === 25 ? [row[0] + 1, ...row.slice(1)] : row) : eastRows, 1);
   houses(festival ? [[14, 9, 13, 2, 2, 0, 4], [15, 15, 19, 2, 1, 5, 1],
     [13, 26, 29, 2, 1, 0, 5], [16, 34, 37, 2, 2, 5, 1]] :
     [[15, 10, 12, 1, 1, 0, 5], [14, 14, 16, 2, 2, 2, 3], [15, 18, 20, 2, 1, 5, 1],
@@ -131,7 +174,7 @@ export function waterTown(spec, api) {
     for (let x = Math.min(start, end); x <= Math.max(start, end); x++) floor(x, z);
   }
 
-  for (const [z, side] of landings) {
+  for (const [z, side] of festival ? [...landings.slice(0, 3), [lanternLanding.z, 1]] : landings) {
     const bank = banks(z)[side];
     floor(bank, z);
     block(bank + (side === 0 ? 1 : -1), 0, z, 'dock');
@@ -157,14 +200,16 @@ export function waterTown(spec, api) {
   for (let x = gardenBank - 7; x <= gardenBank - 4; x++) floor(x, 22);
   const east = banks(22)[1];
   for (let z = 20; z <= 22; z++) for (let x = east + 2; x <= east + 5; x++) floor(x, z, 'plaza');
-  for (const z of [20, 21]) block(east + 5, 1, z, 'stall');
+  if (!festival) for (const z of [20, 21]) block(east + 5, 1, z, 'stall');
 
   if (festival) {
     const {gate, tower} = lanternLandmarks;
     floor(28, 30);
+    for (let z = 25; z <= 28; z++) floor(28, z);
+    for (let x = 29; x <= 31; x++) for (let z = 20; z <= 24; z++) floor(x, z, 'plaza');
     for (let z = 19; z <= 24; z++) for (let x = 31; x <= 37; x++) floor(x, z, 'plaza');
     for (const z of gate.posts) block(gate.x, 1, z, 'pillar', 6);
-    for (const z of [19, 24]) block(35, 1, z, 'stall');
+    for (const [x, z] of lanternStalls) block(x, 1, z, 'stall');
     for (let y = 1; y <= 5; y++) block(tower.x, y, tower.z, 'tower', 6);
     for (let z = 20; z <= 24; z++) for (let x = 12; x <= 14; x++) floor(x, z, 'plaza');
   }
@@ -177,9 +222,10 @@ export function waterTown(spec, api) {
   for (const {role} of api.resolve(world, terrain).roles.values()) roles[role] = (roles[role] ?? 0) + 1;
   if (roles['stone-bridge'] !== crossings.length || !roles.bandstand) throw new Error('水乡石桥或凉亭没有形成');
   return {seed: spec.seed, name: spec.name, world, terrain, initialWorld,
-    camera: festival ? {target: [24, 1, 22], yaw: 326, pitch: 27, zoom: 2.48} :
+    camera: festival ? {target: [27.5, 1, 23.8], yaw: 317, pitch: 32, zoom: 3.7} :
       {target: [24, 1, 23], yaw: 322, pitch: 29, zoom: 2.65},
-    time: festival ? 'night' : undefined,
+    time: festival ? 'dusk' : undefined,
+    timeProgress: festival ? .67 : undefined,
     plan: {character: 'river', edits, unjoined: [], refused: 0, fellBack: false},
     audit: {removed: 0, skipped: [], roles, blocks: world.blocks.size, floors: world.floors.size,
       edges: world.edges.size, bridges: crossings, terrainColumns: initialWorld.terrainEdits.size}};
