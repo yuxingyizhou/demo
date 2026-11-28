@@ -1,8 +1,14 @@
 import {pavilionPlan} from './districts.mjs';
 
 export const waterTownSeed = 46;
+export const lanternTownSeed = 208;
 const size = 48;
 const cell = (x, y, z) => x + 64 * z + 4096 * y;
+export const lanternLandmarks = {
+  bridge: {x: 22, z: 22},
+  gate: {x: 34, z: 22, posts: [20, 21, 23, 24]},
+  tower: {x: 13, z: 22},
+};
 const crossings = [13, 22, 32];
 const landings = [[15, 0], [17, 1], [27, 0], [30, 1]];
 // x at the river end, first and last z, depth, storeys, colour, style
@@ -28,8 +34,14 @@ const terrainSignature = [[5, 20, 0], [8, 20, 1], [24, 25, 0], [35, 11, 1]];
 
 export function isWaterTown(world) {
   const terrain = world.terrainEdits;
-  return world.seed === waterTownSeed && (terrain?.size ?? 0) >= 500 &&
+  return isLanternTown(world) || world.seed === waterTownSeed && (terrain?.size ?? 0) >= 500 &&
     terrainSignature.filter(([x, z, height]) => terrain.get(x + z * size) === height).length >= 3;
+}
+
+export function isLanternTown(world) {
+  const terrain = world.terrainEdits;
+  return world.seed === lanternTownSeed && (terrain?.size ?? 0) >= 290 &&
+    terrainSignature.filter(([x, z, height]) => terrain.get(x + z * size) === height).length >= 2;
 }
 
 export function waterTownRules(world, rules) {
@@ -61,6 +73,7 @@ function makeTerrain(seed, api) {
 }
 
 export function waterTown(spec, api) {
+  const festival = spec.seed === lanternTownSeed;
   const initialWorld = makeTerrain(spec.seed, api);
   const terrain = api.terrainFromWorld(initialWorld);
   let world = initialWorld;
@@ -99,10 +112,14 @@ export function waterTown(spec, api) {
   }
   houses(westRows, -1);
   houses(eastRows, 1);
-  houses([[15, 10, 12, 1, 1, 0, 5], [14, 14, 16, 2, 2, 2, 3], [15, 18, 20, 2, 1, 5, 1],
-    [14, 28, 30, 2, 1, 2, 5], [16, 34, 37, 2, 2, 5, 1]], -1);
-  houses([[31, 9, 11, 2, 2, 5, 4], [31, 15, 16, 2, 1, 0, 3], [32, 23, 26, 2, 2, 3, 1],
-    [31, 28, 31, 2, 1, 1, 4], [33, 34, 38, 2, 1, 5, 3]], 1);
+  houses(festival ? [[14, 9, 13, 2, 2, 0, 4], [15, 15, 19, 2, 1, 5, 1],
+    [13, 26, 29, 2, 1, 0, 5], [16, 34, 37, 2, 2, 5, 1]] :
+    [[15, 10, 12, 1, 1, 0, 5], [14, 14, 16, 2, 2, 2, 3], [15, 18, 20, 2, 1, 5, 1],
+      [14, 28, 30, 2, 1, 2, 5], [16, 34, 37, 2, 2, 5, 1]], -1);
+  houses(festival ? [[31, 9, 11, 2, 2, 5, 4], [32, 14, 17, 2, 2, 0, 3], [36, 23, 26, 2, 2, 5, 4],
+    [31, 28, 31, 2, 1, 1, 4], [33, 34, 38, 2, 1, 5, 3]] :
+    [[31, 9, 11, 2, 2, 5, 4], [31, 15, 16, 2, 1, 0, 3], [32, 23, 26, 2, 2, 3, 1],
+      [31, 28, 31, 2, 1, 1, 4], [33, 34, 38, 2, 1, 5, 3]], 1);
 
   for (let z = 8; z <= 38; z++) {
     const [west, east] = banks(z);
@@ -125,7 +142,9 @@ export function waterTown(spec, api) {
   }
   for (const [x, z] of [[11, 11], [11, 18], [12, 23], [10, 25], [13, 27], [12, 29],
     [12, 33], [13, 36], [36, 10], [38, 13], [37, 17], [36, 20], [35, 23], [39, 24],
-    [38, 29], [37, 35]]) block(x, 1, z, 'tree');
+    [38, 29], [37, 35]]) {
+    if (!world.blocks.has(cell(x, 1, z)) && !(festival && x >= 34 && x <= 37 && z >= 20 && z <= 24)) block(x, 1, z, 'tree');
+  }
 
   const [gardenBank] = banks(23);
   const pavilion = pavilionPlan(world, terrain, cell(gardenBank - 6, 1, 24), api);
@@ -140,6 +159,16 @@ export function waterTown(spec, api) {
   for (let z = 20; z <= 22; z++) for (let x = east + 2; x <= east + 5; x++) floor(x, z, 'plaza');
   for (const z of [20, 21]) block(east + 5, 1, z, 'stall');
 
+  if (festival) {
+    const {gate, tower} = lanternLandmarks;
+    floor(28, 30);
+    for (let z = 19; z <= 24; z++) for (let x = 31; x <= 37; x++) floor(x, z, 'plaza');
+    for (const z of gate.posts) block(gate.x, 1, z, 'pillar', 6);
+    for (const z of [19, 24]) block(35, 1, z, 'stall');
+    for (let y = 1; y <= 5; y++) block(tower.x, y, tower.z, 'tower', 6);
+    for (let z = 20; z <= 24; z++) for (let x = 12; x <= 14; x++) floor(x, z, 'plaza');
+  }
+
   for (const [minX, maxX, minZ, maxZ] of [[11, 15, 12, 17], [34, 37, 28, 34]]) {
     for (let z = minZ; z <= maxZ; z++) for (let x = minX; x <= maxX; x++) floor(x, z, 'garden');
   }
@@ -148,7 +177,9 @@ export function waterTown(spec, api) {
   for (const {role} of api.resolve(world, terrain).roles.values()) roles[role] = (roles[role] ?? 0) + 1;
   if (roles['stone-bridge'] !== crossings.length || !roles.bandstand) throw new Error('水乡石桥或凉亭没有形成');
   return {seed: spec.seed, name: spec.name, world, terrain, initialWorld,
-    camera: {target: [24, 1, 23], yaw: 322, pitch: 29, zoom: 2.65},
+    camera: festival ? {target: [24, 1, 22], yaw: 326, pitch: 27, zoom: 2.48} :
+      {target: [24, 1, 23], yaw: 322, pitch: 29, zoom: 2.65},
+    time: festival ? 'night' : undefined,
     plan: {character: 'river', edits, unjoined: [], refused: 0, fellBack: false},
     audit: {removed: 0, skipped: [], roles, blocks: world.blocks.size, floors: world.floors.size,
       edges: world.edges.size, bridges: crossings, terrainColumns: initialWorld.terrainEdits.size}};

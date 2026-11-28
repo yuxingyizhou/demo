@@ -23,11 +23,56 @@ def apply(root):
     replace('canal moorings', '!n[p(c+a,l+o)]&&!r(c+a,l+o)||[.7,1.1,1.5].some',
             '!jiangnanIsWaterTown(e.world)&&!n[p(c+a,l+o)]&&!r(c+a,l+o)||[.7,1.1,1.5].some')
     replace('tag canal boats', 'line:hr.line,rank:e.data.rank,',
-            'line:hr.line,rank:e.data.rank,canal:jiangnanIsWaterTown(n.facts.world),')
+            'line:hr.line,rank:e.data.rank,canal:jiangnanIsWaterTown(n.facts.world),festival:jiangnanIsLanternTown(n.facts.world),')
     replace('canal boat proportions', 'function es(){return{length:hr.rowLength,beam:hr.rowBeam,',
             'function es(canal=false){return{length:hr.rowLength*(canal?1.4:1),beam:hr.rowBeam*(canal?1.42:1),')
     replace('canal boat hull', 'actor:`rowboat`,build(e,t){let n=t.mesh(),r=Qo(e.params?.look),a=jt(n,es(),r);',
             'actor:`rowboat`,build(e,t){let n=t.mesh(),r=Qo(e.params?.look),a=jt(n,es(e.params?.canal),r);')
+    replace('festival lights on boats', 'n.with({ink:`oars`},()=>{let e=a.sheer(.5)-.014;',
+            'e.params?.festival&&n.at(F(0,0,a.z(.20,.16)),()=>jiangnanBoatLantern(n,z.glow)),'
+            'n.with({ink:`oars`},()=>{let e=a.sheer(.5)-.014;')
+    replace('festive lamps travel with the rower', 'actor:`rower`,build(e,t){let n=t.mesh(),r=Qo(e.params?.look??0),a=jt(n,es(),r);',
+            'actor:`rower`,build(e,t){let n=t.mesh(),r=Qo(e.params?.look??0),a=jt(n,es(e.params?.canal),r);'
+            'if(e.params?.festival){n.at(F(0,0,a.z(.17,.18)),()=>jiangnanBoatLantern(n,z.glow,true));'
+            'n.at(F(0,-.02,a.z(.81,.18)),()=>jiangnanBoatLantern(n,z.glow,true))}')
+    replace('festival boat procession route', 'joined by open water (at most two in the town).`,find({facts:e}){let t=[],n=fr(e),',
+            'joined by open water (at most two in the town).`,find({facts:e}){'
+            'if(jiangnanIsLanternTown(e.world)){'
+            'const from=S(23,0,27),to=S(26,0,30),a=e.structureAt.get(from),b=e.structureAt.get(to);'
+            'const [ax,az,bx,bz]=[25.5,24.2,25.5,30.2];'
+            'return a!==void 0&&b!==void 0&&e.kinds.get(from)===`dock`&&e.kinds.get(to)===`dock`&&'
+            'Ko(Uo(e),[ax,az],[bx,bz])?[{anchor:from,structure:a,key:`festival`,data:{a,b,ax,az,bx,bz}}]:[]}'
+            'let t=[],n=fr(e),')
+    replace('mark the moving festival boat', 'look:A(n.seed,`L20`,`look`,r.a)%8,ax:r.ax,',
+            'look:A(n.seed,`L20`,`look`,r.a)%8,festival:jiangnanIsLanternTown(n.facts.world),'
+            'canal:jiangnanIsLanternTown(n.facts.world),ax:r.ax,')
+    replace('hang festival lamps on the market stalls',
+            '()=>uh(r,{role:a,goods:Zd(o)??qd(t.world.seed,n),front:Qd(o)??2,seed:e.seed,color:e.color}));',
+            '()=>{uh(r,{role:a,goods:Zd(o)??qd(t.world.seed,n),front:Qd(o)??2,seed:e.seed,color:e.color});'
+            'if(jiangnanIsLanternTown(t.world))jiangnanMarketLanterns(r,z.glow)});')
+    replace('festival bridge gallery', 'ee=e=>l(w(e),f(e))?t.terrain.height[p(w(e),f(e))]:0;for(let e of o.values())',
+            'ee=e=>l(w(e),f(e))?t.terrain.height[p(w(e),f(e))]:0;'
+            'const bridge=jiangnanLandmarks.bridge;'
+            'if(jiangnanIsLanternTown(t.world)&&t.roles.get(e.id)?.role===`stone-bridge`&&'
+            'e.cells.some(cell=>w(cell)===bridge.x&&f(cell)===bridge.z)){'
+            'const xs=e.cells.map(w),left=Math.min(...xs),right=Math.max(...xs)+1;'
+            'r.at(F((left+right)/2,0,bridge.z+.5),()=>'
+            'jiangnanCoveredBridge(r,right-left,h,u?Oc.hump:0,fe,jiangnanFestivalMaterials()))}'
+            'for(let e of o.values())')
+    replace('festival gate posts', 'o=e.cells[0],s=(t.featuresByStructure.get(e.id)??[]).find(e=>e.type===`pavilion-bay`);',
+            'o=e.cells[0],s=(t.featuresByStructure.get(e.id)??[]).find(e=>e.type===`pavilion-bay`);'
+            'const gate=jiangnanLandmarks.gate,post=f(o);'
+            'if(jiangnanIsLanternTown(t.world)&&e.color===6&&c(o)===1&&w(o)===gate.x&&gate.posts.includes(post)){'
+            'r.at(F(gate.x+.5,h,post+.5),()=>jiangnanGatePost(r,Math.abs(post-gate.z)===1?1.85:1.28,jiangnanFestivalMaterials()));'
+            'if(post===gate.posts[0])r.at(R(F(gate.x+.5,h,gate.z+.5),L(Math.PI/2)),()=>'
+            'jiangnanGateRoof(r,jiangnanFestivalMaterials()));return{mesh:r.build(),anchors:a}}')
+    replace('festival octagonal pagoda', 'a={},o=yg(e,t),{storeys:s,round:l,foot:u,belfry:d,world:f}=o,',
+            'a={},first=e.cells[0],tower=jiangnanLandmarks.tower;'
+            'if(jiangnanIsLanternTown(t.world)&&e.color===6&&first>>12===1&&(first&63)===tower.x&&(first>>6&63)===tower.z){'
+            'const root=F(tower.x+.5,h,tower.z+.5);'
+            'r.at(root,()=>jiangnanPagoda(r,jiangnanFestivalMaterials(),Math.min(4,e.cells.length)));'
+            'return{mesh:r.build(),anchors:a}}'
+            'let o=yg(e,t),{storeys:s,round:l,foot:u,belfry:d,world:f}=o,')
     replace('stone canal landing', 'return fl(i,e,t),Ga(i,r,e,t,n,e=>e.type===`ladder`?null:void 0),',
             'const dock=jiangnanIsWaterTown(t.world)&&e.cells.length===1?al(e,t).get(e.cells[0]):null;'
             'const bank=dock&&Mo.find(dir=>dock.side[dir]===`land`);'
@@ -164,10 +209,15 @@ def apply(root):
             'return e.with({color:n.roof,pattern:z.shingles,ink:`roof`},()=>e.lathe([[t+i-.01,0],[a,-.015],[a,.03],[a*.74,o*.2],[a*.46,o*.5],[a*.2,o*.8],[0,o]],{segments:18})),og(sg(e,o-.01))',
             'return jiangnanTowerEaves(e,a/1.38,o,n.roof,z.shingles),og(sg(e,o-.01))')
 
-    for module in ('buildings', 'people'):
+    for module in ('buildings', 'people', 'festival'):
         shutil.copyfile(Path(__file__).with_name(f'{module}.mjs'), assets / f'jiangnan-{module}.mjs')
     bundle.write_text('import {waterTownRules as jiangnanWaterRules,waterTownShapeRules as jiangnanWaterShapeRules,'
-                      'isWaterTown as jiangnanIsWaterTown} from "./water-town.mjs";\n'
+                      'isWaterTown as jiangnanIsWaterTown,isLanternTown as jiangnanIsLanternTown,'
+                      'lanternLandmarks as jiangnanLandmarks} from "./water-town.mjs";\n'
+                      'import {boatLantern as jiangnanBoatLantern,marketLanterns as jiangnanMarketLanterns,'
+                      'coveredBridge as jiangnanCoveredBridge,'
+                      'gatePost as jiangnanGatePost,gateRoof as jiangnanGateRoof,pagoda as jiangnanPagoda} from "./jiangnan-festival.mjs";\n'
+                      'const jiangnanFestivalMaterials=()=>({tiles:z.shingles,wood:z.planks,stone:z.stone,glow:z.glow});\n'
                       'import {roofLift as jiangnanRoofLift,roofNormal as jiangnanRoofNormal,'
                       'tileEnds as jiangnanTileEnds,lattice as jiangnanLattice,entryFrame as jiangnanEntry,'
                       'dwellingRules as jiangnanDwellingRules,hardGable as jiangnanHardGable,'
@@ -186,4 +236,27 @@ def apply(root):
             'jiangnan:`reed-hat`,dress:!1,hat:`straw`,hatColor:G.yellow,top:gr.roof[3]')
     replace('sailor clothing', 'a={...i,dress:!1,top:r%2==0?G.white:gr.roof[1]',
             'a={...i,jiangnan:r%2==0?`jacket`:`apron`,dress:!1,top:r%2==0?G.white:gr.roof[1]')
+    replace('preserve lanterns when a boat casts off', 'l=e.spawn({actor:c,params:{look:a}},n),',
+            'l=e.spawn({actor:c,params:{look:a,canal:t.params?.canal,festival:t.params?.festival}},n),')
+    replace('begin the lantern procession early', 'rowing:!1,waitLeft:6+t.rand(`first`)*20,',
+            'rowing:!1,waitLeft:e.params?.festival ? .28 : 6+t.rand(`first`)*20,')
+    replace('read the procession flag before resolving coordinates',
+            'changed(e,t){e.ends=Tl(t.item.params??{})},update(e,t,r,i){if(i.shape',
+            'changed(e,t){e.ends=Tl(t.item.params??{})},update(e,t,r,i){const festival=i.item.params?.festival;if(i.shape')
+    replace('row in the lantern festival at night', 'n=r.time.isDay&&e.water?T(e.water,[e.x,e.z],e.ends[t],.15):null;',
+            'n=(r.time.isDay||festival)&&e.water?T(e.water,[e.x,e.z],e.ends[t],.15):null;')
+    replace('festival boat turns at each end', 'e.waitLeft=Cl+i.rand(`wait`,e.waits++)*wl)',
+            'e.waitLeft=festival?2.5:Cl+i.rand(`wait`,e.waits++)*wl)')
+    replace('festival boat procession pace', 'e.leg+xl*(.45+1.1*n)*t*e.slow)',
+            'e.leg+(festival?xl*1.35:xl)*(.45+1.1*n)*t*e.slow)')
+    replace('moving festival light on water', '    } else if (pat == 11) {\n      // water on a side face',
+            '''    } else if (pat == 41) {
+      float ripple = sin(vW.z * 9.0 + vW.x * 11.0 - uTime * 3.2) * 0.5 + 0.5;
+      float light = uGlow * (0.28 + ripple * 0.72);
+      if (light < 0.12) discard;
+      hatchable = 0.0;
+      col = mix(shade(uSea, s), base, light);
+      glow = light;
+    } else if (pat == 11) {
+      // water on a side face''')
     pointer.write_text(source, encoding='utf-8')

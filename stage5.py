@@ -10,7 +10,7 @@ def apply(root):
         s=s.replace(old,new,1)
     patch('import {PRESETS as jiangnanPresets,presetPlan as jiangnanPlan,nativeSceneAPI as jiangnanEngine} from "./jiangnan-scene.mjs";', '''import {PRESETS as jiangnanPresets,presetPlan as jiangnanBase,nativeSceneAPI as jiangnanEngine} from "./jiangnan-scene.mjs";
 import {addDistrict as jiangnanDistrict,pavilionPlan as jiangnanPavilion} from "./districts.mjs";
-const jiangnanPlan=(id,api)=>{const base=jiangnanBase(id,api);return id===`canal`?base:jiangnanDistrict(base,id,api)};''')
+const jiangnanPlan=(id,api)=>{const base=jiangnanBase(id,api);return base.initialWorld?base:jiangnanDistrict(base,id,api)};''')
     # Explicitly distinguish native tools from automatic components; macro state belongs to tray.
     patch('setIdle(e){n.idle!==e&&(n.idle=e,S(),i())},select(e){let t=hr(e)', 'setIdle(e){n.idle!==e&&(n.idle=e,n.stamp=null,S(),i())},selectStamp(){w.select(`pillar`);n.stamp=`pavilion`;i()},select(e){n.stamp=null;let t=hr(e)')
     patch('[`dock`,`乌篷船`,`在可通航水面放置码头，等待船只生成。`]', '[`dock`,`码头`,`在可通航水面放置码头，等待船只生成。`]')

@@ -3,6 +3,7 @@ import {readdirSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {navAudit} from './districts.mjs';
+import {isLanternTown, lanternLandmarks} from './water-town.mjs';
 
 const assets = resolve(process.argv[2] || 'dist', 'assets');
 const load = name => import(pathToFileURL(resolve(assets, name)));
@@ -60,6 +61,30 @@ for (const preset of PRESETS) {
     assert(!dressing.props.some(prop => prop.type === 'maypole' || prop.type === 'terrace-set'));
     assert.equal(nav.mainEntrancesReachable, nav.mainEntrances);
     assert(encoded.length < 6000);
+  }
+
+  if (preset.id === 'lantern') {
+    assert(isLanternTown(decoded.world));
+    assert.equal(audit.roles['stone-bridge'], 3);
+    assert.equal(audit.roles.jetty, 4);
+    assert.equal(dressing.actors.filter(actor => actor.type === 'rowboat' && actor.params.festival).length, 4);
+    assert.equal(dressing.actors.filter(actor => actor.type === 'rower' && actor.params.festival).length, 1);
+    assert(!dressing.actors.some(actor => actor.type === 'sailboat' ||
+      actor.type === 'ship-call' && actor.variant !== 'barge'));
+    const builder = engine.ht();
+    const parts = engine.gt();
+    const rangeAt = ({x, z}, level, axis) => {
+      const structure = shape.structures.get(shape.structureAt.get(save.U(x, level, z)));
+      assert(structure);
+      const {position} = builder.build(structure, shape, parts).mesh;
+      const coordinates = position.filter((_, index) => index % 3 === axis);
+      return Math.max(...coordinates) - Math.min(...coordinates);
+    };
+    assert(rangeAt(lanternLandmarks.bridge, 0, 1) > 2.3, 'a timber roof rises over the stone deck');
+    const {gate} = lanternLandmarks;
+    assert(rangeAt({x: gate.x, z: gate.posts[0]}, 1, 2) > 4, 'the gate model spans all three passages');
+    assert(rangeAt(lanternLandmarks.tower, 1, 1) > 3.9, 'the pagoda reaches its finial');
+    assert.equal(nav.mainEntrancesReachable, nav.mainEntrances);
   }
 
   console.log(JSON.stringify({id: preset.id, seed, edits: plan.edits.length, ...audit, ...nav, lamps}));

@@ -30,8 +30,8 @@ def apply(root):
           'openJiangnan=e=>{S.undo(),D.stop(),n.openJiangnan(e)},ye=e=>{S.undo(),D.stop(),n.newIsland(e)}')
     patch('Ce=Da({growTown(e){','''Ce=Da({jiangnanPreset(id,signal){return Promise.resolve().then(()=>{if(signal.aborted)return;let result=jiangnanPlan(id,jiangnanEngine);if(!signal.aborted)openJiangnan(result)}).catch(error=>{g.toast(`场景未能打开：`+error.message)})},growTown(e){''')
     patch('openTown(e){cs(),J.detach(),ds(),os(Do(e)),Q.schedule(),Z?.feedback.toast',
-          'openJiangnan({world,terrain,name,camera}){cs(),J.detach(),ds(),os({world,terrain});jnFirstVisit=!1;'
-          'if(camera)Y.setCamera({...Y.getCamera(),...camera});J.suggestName(name),Q.schedule()},'
+          'openJiangnan({world,terrain,name,camera,time}){cs(),J.detach(),ds(),os({world,terrain});jnFirstVisit=!1;'
+          'if(camera)Y.setCamera({...Y.getCamera(),...camera});if(time)X.hold(time);J.suggestName(name),Q.schedule()},'
           'openTown(e){cs(),J.detach(),ds(),os(Do(e)),Q.schedule(),Z?.feedback.toast')
     patch('for(let a=0;;a++){let o=r>=n.islands||i>=n.plans','for(let a=0;a<1200;a++){let o=r>=n.islands||i>=n.plans')
     patch('exact:!1,generated:r,plans:i};yield}}var Pi=','exact:!1,generated:r,plans:i};yield}return null}var Pi=')
